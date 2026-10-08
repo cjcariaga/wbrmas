@@ -118,8 +118,8 @@ if ($action === 'add') {
     $ef = aes_encrypt($first); $em = aes_encrypt($middle);
     $el = aes_encrypt($last);  $eb = aes_encrypt($bdate);
     $ec = aes_encrypt($contact);
-    // 17 params: s×11 + i×2 + s + i×2 + i = sssssssssssiiisiii
-    $stmt->bind_param("sssssssssssiiisiii",
+    // 17 params: s×11 + i×2 (years,indigent) + s (photo_path) + i×3 (is_head,hh_id_val,uid)
+    $stmt->bind_param("sssssssssssiisiii",
         $code,$ef,$em,$el,$eb,$sex,$civil,$ec,$email,$address,$purok,
         $years,$indigent,$photo_path,$is_head,$hh_id_val,$uid
     );
