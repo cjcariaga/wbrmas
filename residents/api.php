@@ -74,7 +74,6 @@ if ($action === 'add') {
     $email   = sanitize_input($_POST['email']          ?? '');
     $address = sanitize_input($_POST['address']        ?? '');
     $purok   = sanitize_input($_POST['purok']          ?? '');
-    $drawer_location = sanitize_input($_POST['drawer_location'] ?? '');
     $years   = (int)($_POST['years_of_residency']      ?? 0);
     $indigent= (int)($_POST['is_indigent']             ?? 0);
     $is_head = (int)($_POST['is_head_of_family']       ?? 0);
@@ -82,15 +81,6 @@ if ($action === 'add') {
 
     if (!$first || !$last || !$bdate) {
         echo json_encode(['success'=>false,'message'=>'First name, last name, and birth date are required.']); exit;
-    }
-    if (!preg_match("/^[\p{L} .'-]+$/u", $first) || ($middle !== '' && !preg_match("/^[\p{L} .'-]+$/u", $middle)) || !preg_match("/^[\p{L} .'-]+$/u", $last)) {
-        echo json_encode(['success'=>false,'message'=>'Names may contain letters, spaces, apostrophes, periods, and hyphens only.']); exit;
-    }
-    if (!preg_match('/^\d+$/', (string)($_POST['years_of_residency'] ?? '0')) || $years < 0 || $years > 200) {
-        echo json_encode(['success'=>false,'message'=>'Years of residency must be a number from 0 to 200.']); exit;
-    }
-    if ($contact !== '' && !preg_match('/^[0-9+() .-]+$/', $contact)) {
-        echo json_encode(['success'=>false,'message'=>'Contact number may contain numbers and phone characters only.']); exit;
     }
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $bdate)) {
         echo json_encode(['success'=>false,'message'=>'Invalid date format.']); exit;
@@ -104,40 +94,35 @@ if ($action === 'add') {
     $count_r = (int)$conn->query("SELECT COUNT(*) FROM tbl_residents")->fetch_row()[0];
     $code    = 'BR-' . date('Y') . '-' . str_pad($count_r + 1, 5, '0', STR_PAD_LEFT);
 
-    // IDOR: validate household_head_id if provided
+    // IDOR: validate household_head_id
     if ($hh_id) {
         $hchk = $conn->prepare("SELECT resident_id FROM tbl_residents WHERE resident_id=? AND is_archived=0 AND is_head_of_family=1");
         $hchk->bind_param("i", $hh_id); $hchk->execute();
-        if (!$hchk->get_result()->fetch_assoc()) $hh_id = 0; // silently clear invalid ref
+        if (!$hchk->get_result()->fetch_assoc()) $hh_id = 0;
         $hchk->close();
     }
-    // A head of family cannot also be a member of another household
     if ($is_head) $hh_id = 0;
+    $hh_id_val = $hh_id > 0 ? $hh_id : null;
+    $photo_path = $photo_path ?? '';
 
     $stmt = $conn->prepare(
         "INSERT INTO tbl_residents
          (resident_code,first_name,middle_name,last_name,birth_date,sex,civil_status,
-          contact_number,email,address,purok,drawer_location,years_of_residency,is_indigent,photo_path,
+          contact_number,email,address,purok,years_of_residency,is_indigent,photo_path,
           is_head_of_family,household_head_id,record_status,registered_by)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'Pending Verification',?)"
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'Pending Verification',?)"
     );
     if (!$stmt) {
-        echo json_encode(['success'=>false,'message'=>'Database error: '.$conn->error]); exit;
+        echo json_encode(['success'=>false,'message'=>'DB prepare error: '.$conn->error]); exit;
     }
     $ef = aes_encrypt($first); $em = aes_encrypt($middle);
     $el = aes_encrypt($last);  $eb = aes_encrypt($bdate);
     $ec = aes_encrypt($contact);
-    // bind_param cannot take SQL NULL via a PHP null int; 0 is stored then cleared
-    $hh_id_val = $hh_id > 0 ? $hh_id : 0;
-    $photo_path = $photo_path ?? '';
-    // 18 placeholders: 12 strings, years, indigent, photo, is_head, household_head, registered_by
-    $ok = $stmt->bind_param(str_repeat('s', 12).'iisiii',
-        $code,$ef,$em,$el,$eb,$sex,$civil,$ec,$email,$address,$purok,$drawer_location,$years,$indigent,$photo_path,
-        $is_head,$hh_id_val,$uid
+    // 17 params: s×11 + i×2 + s + i×2 + i = sssssssssssiiisiii
+    $stmt->bind_param("sssssssssssiiisiii",
+        $code,$ef,$em,$el,$eb,$sex,$civil,$ec,$email,$address,$purok,
+        $years,$indigent,$photo_path,$is_head,$hh_id_val,$uid
     );
-    if (!$ok) {
-        echo json_encode(['success'=>false,'message'=>'Bind error: '.$stmt->error]); $stmt->close(); exit;
-    }
 
     if ($stmt->execute()) {
         $rid = $conn->insert_id;
@@ -145,7 +130,7 @@ if ($action === 'add') {
             $clr = $conn->prepare("UPDATE tbl_residents SET household_head_id=NULL WHERE resident_id=?");
             if ($clr) { $clr->bind_param("i", $rid); $clr->execute(); $clr->close(); }
         }
-        write_audit_log($uid, 'CREATE_RESIDENT', "resident_id:$rid", "Code:$code Name:$last,$first Drawer:".($drawer_location ?: 'Unassigned'));
+        write_audit_log($uid, 'CREATE_RESIDENT', "resident_id:$rid", "Code:$code Name:$last,$first");
         echo json_encode(['success'=>true,'message'=>'Resident added.','id'=>$rid,'code'=>$code]);
     } else {
         echo json_encode(['success'=>false,'message'=>'Database error: '.$stmt->error]);
@@ -170,7 +155,6 @@ elseif ($action === 'update') {
     $email   = sanitize_input($_POST['email']          ?? '');
     $address = sanitize_input($_POST['address']        ?? '');
     $purok   = sanitize_input($_POST['purok']          ?? '');
-    $drawer_location = sanitize_input($_POST['drawer_location'] ?? '');
     $years   = (int)($_POST['years_of_residency']      ?? 0);
     $indigent= (int)($_POST['is_indigent']             ?? 0);
     $is_head = (int)($_POST['is_head_of_family']       ?? 0);
@@ -216,18 +200,19 @@ elseif ($action === 'update') {
     $stmt = $conn->prepare(
         "UPDATE tbl_residents
          SET first_name=?,middle_name=?,last_name=?,birth_date=?,sex=?,civil_status=?,
-             contact_number=?,email=?,address=?,purok=?,drawer_location=?,years_of_residency=?,is_indigent=?,
+             contact_number=?,email=?,address=?,purok=?,years_of_residency=?,is_indigent=?,
              photo_path=?,is_head_of_family=?,household_head_id=?
          WHERE resident_id=?"
     );
     $ef=aes_encrypt($first); $em=aes_encrypt($middle); $el=aes_encrypt($last);
     $eb=aes_encrypt($bdate); $ec=aes_encrypt($contact);
-    $stmt->bind_param(str_repeat('s', 11).'iisiii',
-        $ef,$em,$el,$eb,$sex,$civil,$ec,$email,$address,$purok,$drawer_location,$years,$indigent,
+    // 16 params: s×10 + i×2 + s + i×2 + i = ssssssssssiisiii
+    $stmt->bind_param("ssssssssssiisiii",
+        $ef,$em,$el,$eb,$sex,$civil,$ec,$email,$address,$purok,$years,$indigent,
         $photo_path,$is_head,$hh_id_val,$rid
     );
     if ($stmt->execute()) {
-        write_audit_log($uid, 'UPDATE_RESIDENT', "resident_id:$rid", "Name:$last,$first Drawer:".($drawer_location ?: 'Unassigned'));
+        write_audit_log($uid, 'UPDATE_RESIDENT', "resident_id:$rid", "Name:$last,$first");
         echo json_encode(['success'=>true]);
     } else {
         echo json_encode(['success'=>false,'message'=>'Update failed: '.$stmt->error]);
