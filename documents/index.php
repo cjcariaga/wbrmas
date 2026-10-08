@@ -216,7 +216,7 @@ require_once '../includes/header.php';
       <?php endif; ?>
     </p>
   </div>
-  <a href="/BRGYMS/documents/create.php" class="btn btn-primary"><i class="fas fa-plus"></i> New Request</a>
+  <a href="/documents/create.php" class="btn btn-primary"><i class="fas fa-plus"></i> New Request</a>
 </div>
 
 <!-- Status Filter Tabs + View Toggle -->
@@ -572,7 +572,7 @@ async function updateStatus(id, status, csrf, blotter_acknowledged) {
   const payload = {request_id:id, status, csrf_token:csrf};
   if (blotter_acknowledged) payload.blotter_acknowledged = 1;
 
-  const res = await apiRequest('/BRGYMS/documents/api.php?action=update_status', payload);
+  const res = await apiRequest('/documents/api.php?action=update_status', payload);
 
   if (res.success) {
     showToast('success', `Request ${status.toLowerCase()}.`);
@@ -643,7 +643,7 @@ async function saveDocumentDrawer() {
   const drawerLocation = document.getElementById('drawerLocationValue').value.trim();
   const button = document.getElementById('saveDrawerLocationButton');
   button.disabled = true;
-  const res = await apiRequest('/BRGYMS/documents/api.php?action=update_drawer', {
+  const res = await apiRequest('/documents/api.php?action=update_drawer', {
     request_id: requestId,
     drawer_location: drawerLocation,
     csrf_token: '<?= $csrf ?>'
@@ -725,7 +725,7 @@ async function confirmGenerateDoc() {
 
   button.disabled = true;
   try {
-    const res = await apiRequest('/BRGYMS/documents/print_request.php', {
+    const res = await apiRequest('/documents/print_request.php', {
       request_id: pendingPrintRequestId,
       delivery_method: destination,
       received_by: receivedBy,
@@ -768,7 +768,7 @@ async function confirmDocumentRelease() {
   }
   button.disabled = true;
   try {
-    const result = await apiRequest('/BRGYMS/documents/api.php?action=release_document', {
+    const result = await apiRequest('/documents/api.php?action=release_document', {
       request_id: requestId,
       received_by: receivedBy,
       released_at: releasedAt,
@@ -789,7 +789,7 @@ async function confirmDocumentRelease() {
 }
 
 async function reprintDoc(id) {
-  const res = await apiRequest('/BRGYMS/documents/print_request.php',{request_id:id,csrf_token:'<?= $csrf ?>'});
+  const res = await apiRequest('/documents/print_request.php',{request_id:id,csrf_token:'<?= $csrf ?>'});
   if(res.success) printDocument(res.html);
   else showToast('error','Failed to reprint.');
 }

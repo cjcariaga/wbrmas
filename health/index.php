@@ -94,7 +94,7 @@ require_once '../includes/header.php';
         <tbody>
         <?php if ($page_records): foreach ($page_records as $record): ?>
           <tr>
-            <td><a href="/BRGYMS/residents/view.php?id=<?= (int)$record['resident_id'] ?>"><code><?= sanitize_output($record['resident_code']) ?></code></a></td>
+            <td><a href="/residents/view.php?id=<?= (int)$record['resident_id'] ?>"><code><?= sanitize_output($record['resident_code']) ?></code></a></td>
             <td><?= sanitize_output($type_labels[$record['record_type']] ?? 'Health Record') ?></td>
             <td><strong><?= sanitize_output($record['item_name']) ?></strong></td>
             <td><?= sanitize_output($record['event_date'] ?: '—') ?></td>
@@ -210,7 +210,7 @@ async function saveHealthRecord() {
   if (!data.resident_id || !data.item_name) { showToast('error', 'Select a resident and enter the item.'); return; }
   const action = recordId ? 'update' : 'create';
   if (recordId) data.health_record_id = recordId;
-  const result = await apiRequest('/BRGYMS/health/api.php?action=' + action, data);
+  const result = await apiRequest('/health/api.php?action=' + action, data);
   if (!result.success) { showToast('error', result.message || 'Could not save health record.'); return; }
   showToast('success', result.message || 'Health record saved.');
   const params = new URLSearchParams();

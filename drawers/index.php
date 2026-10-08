@@ -226,7 +226,7 @@ require_once '../includes/header.php';
 const DRAWER_CSRF = <?= json_encode($csrf) ?>;
 const DRAWER_CURRENT_ID = <?= (int)$drawer_id ?>;
 const DRAWER_CURRENT_SEARCH = <?= json_encode($search) ?>;
-const DRAWER_API = '/BRGYMS/drawers/api.php?action=';
+const DRAWER_API = '/drawers/api.php?action=';
 
 function openDrawerModal() {
   document.getElementById('drawerEditId').value = '';

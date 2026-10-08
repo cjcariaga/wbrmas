@@ -40,7 +40,7 @@ a.btn{display:inline-block;margin-top:16px;padding:12px 28px;background:linear-g
     <p>👤 Username: <strong>admin</strong></p>
     <p>🔑 Password: <strong>Admin@1234</strong></p>
   </div>
-  <a href="/BRGYMS/" class="btn">Go to Login →</a>
+  <a href="/" class="btn">Go to Login →</a>
   <p class="warn">⚠️ Delete this file after logging in!</p>
 <?php else: ?>
   <div class="err">❌</div>

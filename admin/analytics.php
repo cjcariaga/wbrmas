@@ -857,7 +857,7 @@ async function viewStaffActions(uid, name) {
   openModal('modalStaffActions');
 
   try {
-    const resp = await fetch(`/BRGYMS/admin/staff_actions_api.php?uid=${uid}&csrf_token=<?= generate_csrf_token() ?>`);
+    const resp = await fetch(`/admin/staff_actions_api.php?uid=${uid}&csrf_token=<?= generate_csrf_token() ?>`);
     const data = await resp.json();
     if (!data.success) {
       document.getElementById('staffActionContent').innerHTML =

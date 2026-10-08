@@ -2,7 +2,7 @@
 </main>
 </div><!-- .app-layout -->
 
-<script src="/BRGYMS/assets/js/main.js"></script>
+<script src="/assets/js/main.js"></script>
 <script>
 // ── Live clock ───────────────────────────────────────────────────────────────
 function updateClock() {
@@ -38,7 +38,7 @@ function updateSessionBadge() {
     badge.innerHTML = `<i class="fas fa-triangle-exclamation"></i> Expiring: ${formatTime(sessionTimer)}`;
     badge.style.cssText = 'background:rgba(231,76,60,.2);color:#e74c3c;border:1px solid #e74c3c;border-radius:20px;padding:4px 12px;';
   } else {
-    window.location.href = '/BRGYMS/index.php?timeout=1';
+    window.location.href = '/index.php?timeout=1';
   }
 }
 setInterval(() => { sessionTimer--; updateSessionBadge(); }, 1000);
@@ -70,7 +70,7 @@ applyTheme(localStorage.getItem('wbrmas_theme') === 'dark');
 let notifOpen = false;
 async function loadNotifications() {
   try {
-    const res  = await fetch('/BRGYMS/notifications_api.php');
+    const res  = await fetch('/notifications_api.php');
     const data = await res.json();
     if (!data.success) return;
     const badge = document.getElementById('notifBadge');
@@ -165,7 +165,7 @@ setInterval(loadNotifications, 60000);
     box.innerHTML = '<div class="gs-hint"><i class="fas fa-circle-notch fa-spin"></i> Searching…</div>';
     openBox();
     try {
-      const res  = await fetch('/BRGYMS/search_api.php?q=' + encodeURIComponent(q));
+      const res  = await fetch('/search_api.php?q=' + encodeURIComponent(q));
       const data = await res.json();
       if (input.value.trim() !== q) return;
       render(data.success ? data : { results: [] }, q);

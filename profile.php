@@ -279,7 +279,7 @@ function showAlert(elId, type, msg) {
 async function saveProfile() {
   const data = Object.fromEntries(new FormData(document.getElementById('profileForm')));
   if (!data.first_name || !data.last_name) { showAlert('profileAlert','error','First name and last name are required.'); return; }
-  const res = await apiRequest('/BRGYMS/profile_api.php?action=update_profile', data);
+  const res = await apiRequest('/profile_api.php?action=update_profile', data);
   if (res.success) {
     showAlert('profileAlert','success','Profile updated successfully!');
     showToast('success','Profile saved!');
@@ -294,7 +294,7 @@ async function changePassword() {
   if (data.new_password.length < 8) { showAlert('pwAlert','error','New password must be at least 8 characters.'); return; }
   if (data.new_password !== data.confirm_password) { showAlert('pwAlert','error','New passwords do not match.'); return; }
   if (data.current_password === data.new_password) { showAlert('pwAlert','error','New password must be different from current password.'); return; }
-  const res = await apiRequest('/BRGYMS/profile_api.php?action=change_password', data);
+  const res = await apiRequest('/profile_api.php?action=change_password', data);
   if (res.success) {
     showAlert('pwAlert','success','Password changed successfully! Please remember your new password.');
     showToast('success','Password updated!');

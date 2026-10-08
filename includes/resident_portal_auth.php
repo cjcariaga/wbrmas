@@ -18,7 +18,7 @@ function resident_portal_current_account($json_response = false) {
             echo json_encode(['success'=>false,'message'=>'Resident portal session required.']);
             exit;
         }
-        header('Location: /BRGYMS/portal/login.php');
+        header('Location: /portal/login.php');
         exit;
     }
 
@@ -30,7 +30,7 @@ function resident_portal_current_account($json_response = false) {
             echo json_encode(['success'=>false,'message'=>'Resident portal session expired.']);
             exit;
         }
-        header('Location: /BRGYMS/portal/login.php?timeout=1');
+        header('Location: /portal/login.php?timeout=1');
         exit;
     }
     $_SESSION['resident_portal_last_activity'] = time();
@@ -60,7 +60,7 @@ function resident_portal_current_account($json_response = false) {
             echo json_encode(['success'=>false,'message'=>'Resident portal account is unavailable.']);
             exit;
         }
-        header('Location: /BRGYMS/portal/login.php');
+        header('Location: /portal/login.php');
         exit;
     }
     return $account;

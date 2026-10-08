@@ -354,7 +354,7 @@ async function submitRequest(){
   // Debug — remove after confirming purpose saves correctly
   console.log('Submitting purpose:', sel, '| is_student:', is_student, '| is_loan:', is_loan);
 
-  const res = await apiRequest('/BRGYMS/documents/api.php?action=create', {
+  const res = await apiRequest('/documents/api.php?action=create', {
     resident_id: rid, document_type_id: dtid, purpose: sel,
     is_student, is_loan, csrf_token: '<?= $csrf ?>'
   });

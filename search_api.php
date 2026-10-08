@@ -58,7 +58,7 @@ if ($res_rows) {
             'icon'    => 'fa-people-group',
             'title'   => $name,
             'body'    => $code . ' · ' . $pk,
-            'link'    => '/BRGYMS/residents/view.php?id=' . (int)$r['resident_id'],
+            'link'    => '/residents/view.php?id=' . (int)$r['resident_id'],
             'badge'   => 'Resident',
         ];
         if (++$count >= 6) break;
@@ -88,7 +88,7 @@ if ($doc_rows) {
             'icon'    => 'fa-file-lines',
             'title'   => $d['request_code'] . ' · ' . $d['type_name'],
             'body'    => $name . ' · ' . $d['status'],
-            'link'    => '/BRGYMS/documents/index.php?q=' . rawurlencode($d['request_code']),
+            'link'    => '/documents/index.php?q=' . rawurlencode($d['request_code']),
             'badge'   => 'Document',
         ];
         if (++$count >= 4) break;
@@ -118,7 +118,7 @@ if ($blot_rows) {
             'icon'    => 'fa-book-open',
             'title'   => $b['case_number'] . ' · ' . ($b['case_type'] ?: 'Case'),
             'body'    => $complainant . ' · ' . $b['resolution_status'],
-            'link'    => '/BRGYMS/blotter/index.php?q=' . rawurlencode($b['case_number']),
+            'link'    => '/blotter/index.php?q=' . rawurlencode($b['case_number']),
             'badge'   => 'Case',
         ];
         if (++$count >= 4) break;

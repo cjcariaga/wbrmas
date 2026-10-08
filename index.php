@@ -196,7 +196,7 @@ if (isset($_GET['clear_pending'])) {
           <h1 id="staffHeroTitle">Barangay<br>San Isidro</h1>
           <p class="staff-hero-location">City of Ilagan, Isabela · Staff and Administration</p>
           <p class="staff-hero-description">A secure workspace for barangay personnel to manage records and deliver responsive public service.</p>
-          <div class="staff-hero-actions"><a class="staff-action-primary" href="#staff-login">Staff sign in <i class="fas fa-arrow-right" aria-hidden="true"></i></a><a class="staff-action-secondary" href="/BRGYMS/portal/login.php">Resident portal</a></div>
+          <div class="staff-hero-actions"><a class="staff-action-primary" href="#staff-login">Staff sign in <i class="fas fa-arrow-right" aria-hidden="true"></i></a><a class="staff-action-secondary" href="/portal/login.php">Resident portal</a></div>
         </div>
         <div class="staff-hero-facts" id="staffServices">
           <div class="staff-hero-fact"><div class="staff-fact-label"><i class="far fa-building" aria-hidden="true"></i> Barangay</div><div class="staff-fact-value">San Isidro</div></div>
@@ -296,7 +296,7 @@ if (isset($_GET['clear_pending'])) {
       </a>
     </div>
 
-            <div class="login-footer"><span>RA 10173 Compliant</span><a href="/BRGYMS/portal/login.php">Resident Portal Login</a></div>
+            <div class="login-footer"><span>RA 10173 Compliant</span><a href="/portal/login.php">Resident Portal Login</a></div>
           </div>
         </div>
       </div>
@@ -349,7 +349,7 @@ const tryAgain = document.getElementById('tryAgainWrap');
 async function postFingerprintApi(action, data) {
   const formData = new FormData();
   Object.entries(data).forEach(([key, value]) => formData.append(key, value));
-  const response = await fetch('/BRGYMS/fingerprint_api.php?action=' + encodeURIComponent(action), {
+  const response = await fetch('/fingerprint_api.php?action=' + encodeURIComponent(action), {
     method: 'POST',
     body: formData,
     credentials: 'same-origin'
@@ -403,7 +403,7 @@ async function startBiometricLogin() {
   biometricLoginStarted = true;
   setFpState('scanning', 'Starting secure login…', 'Preparing the fingerprint scanner');
   try {
-    const startResponse = await fetch('/BRGYMS/fingerprint_api.php?action=start_biometric', {
+    const startResponse = await fetch('/fingerprint_api.php?action=start_biometric', {
       method: 'POST',
       body: new URLSearchParams({csrf_token: '<?= $csrf ?>'}),
       credentials: 'same-origin'
@@ -421,7 +421,7 @@ async function startBiometricLogin() {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
-        apiUrl: window.location.origin + '/BRGYMS/fingerprint_api.php',
+        apiUrl: window.location.origin + '/fingerprint_api.php',
         challenge: session.challenge,
         ticket: session.ticket,
         candidateTimestamp: session.candidate_timestamp,

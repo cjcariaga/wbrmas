@@ -318,7 +318,7 @@ async function runBackup() {
   fd.append('action',     'backup_now');
 
   try {
-    const resp = await fetch('/BRGYMS/admin/backup.php', { method:'POST', body:fd });
+    const resp = await fetch('/admin/backup.php', { method:'POST', body:fd });
     const res  = await resp.json();
     status.style.display = 'block';
     if (res.success) {
@@ -347,7 +347,7 @@ async function saveConfig() {
   fd.append('csrf_token', BACKUP_CSRF);
   fd.append('action',     'save_config');
 
-  const resp = await fetch('/BRGYMS/admin/backup.php', { method:'POST', body:fd });
+  const resp = await fetch('/admin/backup.php', { method:'POST', body:fd });
   const res  = await resp.json();
   if (res.success) {
     showToast('success', 'Backup configuration saved!');

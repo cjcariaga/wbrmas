@@ -61,7 +61,7 @@ $r['contact_number']= aes_decrypt($r['contact_number']);
 $csrf = generate_csrf_token();
 
 $photo_url = $r['photo_path']
-    ? '/BRGYMS/' . htmlspecialchars($r['photo_path'], ENT_QUOTES, 'UTF-8')
+    ? '/' . htmlspecialchars($r['photo_path'], ENT_QUOTES, 'UTF-8')
     : null;
 
 require_once '../includes/header.php';
@@ -357,7 +357,7 @@ setInterval(async () => {
   const fd = new FormData();
   fd.append('csrf_token',  LOCK_CSRF);
   fd.append('resident_id', LOCK_RID);
-  await fetch('/BRGYMS/residents/api.php?action=heartbeat', { method:'POST', body:fd });
+  await fetch('/residents/api.php?action=heartbeat', { method:'POST', body:fd });
   lockSeconds = 15 * 60; // reset countdown
 }, 4 * 60 * 1000);
 
@@ -366,7 +366,7 @@ async function releaseLock() {
   const fd = new FormData();
   fd.append('csrf_token',  LOCK_CSRF);
   fd.append('resident_id', LOCK_RID);
-  navigator.sendBeacon('/BRGYMS/residents/api.php?action=unlock', fd);
+  navigator.sendBeacon('/residents/api.php?action=unlock', fd);
 }
 window.addEventListener('beforeunload', releaseLock);
 window.addEventListener('pagehide',     releaseLock);
@@ -387,7 +387,7 @@ async function loadHouseholdHeads() {
   const sel = document.getElementById('householdHeadSelect');
   if (!sel) return;
   try {
-    const resp = await fetch('/BRGYMS/residents/api.php?action=get_heads&csrf_token=<?= $csrf ?>');
+    const resp = await fetch('/residents/api.php?action=get_heads&csrf_token=<?= $csrf ?>');
     const data = await resp.json();
     if (!data.success) return;
     while (sel.options.length > 1) sel.remove(1);
@@ -426,7 +426,7 @@ async function submitEdit() {
   fd.set('household_head_id', hhSel ? (hhSel.value || '0') : '0');
 
   try {
-    const resp = await fetch('/BRGYMS/residents/api.php?action=update', {
+    const resp = await fetch('/residents/api.php?action=update', {
       method: 'POST',
       body: fd   // no Content-Type header — browser sets multipart boundary automatically
     });

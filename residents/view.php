@@ -105,7 +105,7 @@ require_once '../includes/header.php';
   </div>
   <div class="d-flex gap-2">
     <?php if (is_admin() && !$r['is_archived']): ?>
-    <a href="/BRGYMS/residents/edit.php?id=<?= $rid ?>" class="btn btn-secondary btn-sm">
+    <a href="/residents/edit.php?id=<?= $rid ?>" class="btn btn-secondary btn-sm">
       <i class="fas fa-pen-to-square"></i> Edit
     </a>
     <?php endif; ?>
@@ -123,7 +123,7 @@ require_once '../includes/header.php';
         <div style="width:96px;height:96px;border-radius:50%;overflow:hidden;margin:0 auto 14px;
                     border:3px solid var(--border);background:#f0f0f0;display:flex;align-items:center;justify-content:center;">
           <?php if ($r['photo_path']): ?>
-            <img src="/BRGYMS/<?= htmlspecialchars($r['photo_path'],ENT_QUOTES) ?>"
+            <img src="/<?= htmlspecialchars($r['photo_path'],ENT_QUOTES) ?>"
                  style="width:100%;height:100%;object-fit:cover;" alt="Photo">
           <?php else: ?>
             <i class="fas fa-user" style="font-size:2.5rem;color:#ccc;"></i>
@@ -215,7 +215,7 @@ require_once '../includes/header.php';
       <div class="card-header">
         <h3><i class="fas fa-file-lines"></i> Document Requests</h3>
         <?php if (!$r['is_archived']): ?>
-        <a href="/BRGYMS/documents/create.php?resident_id=<?= $rid ?>" class="btn btn-primary btn-sm">
+        <a href="/documents/create.php?resident_id=<?= $rid ?>" class="btn btn-primary btn-sm">
           <i class="fas fa-plus"></i> New Request
         </a>
         <?php endif; ?>
@@ -268,9 +268,9 @@ require_once '../includes/header.php';
       <div class="card-header">
         <h3><i class="fas fa-heart-pulse"></i> Health Records</h3>
         <div class="d-flex gap-2">
-          <a href="/BRGYMS/health/index.php?resident_id=<?= $rid ?>" class="btn btn-secondary btn-sm">Open List</a>
+          <a href="/health/index.php?resident_id=<?= $rid ?>" class="btn btn-secondary btn-sm">Open List</a>
           <?php if ($can_manage_health && !$r['is_archived']): ?>
-          <a href="/BRGYMS/health/index.php?resident_id=<?= $rid ?>&add=1" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add</a>
+          <a href="/health/index.php?resident_id=<?= $rid ?>&add=1" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add</a>
           <?php endif; ?>
         </div>
       </div>
@@ -344,7 +344,7 @@ async function changeStatus() {
   fd.append('csrf_token',   '<?= $csrf ?>');
   fd.append('resident_id',  '<?= $rid ?>');
   fd.append('record_status', status);
-  const resp = await fetch('/BRGYMS/residents/api.php?action=change_status', { method:'POST', body:fd });
+  const resp = await fetch('/residents/api.php?action=change_status', { method:'POST', body:fd });
   const res  = await resp.json();
   if (res.success) {
     showToast('success', 'Record status updated to: ' + status);

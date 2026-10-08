@@ -1,6 +1,6 @@
 <?php
 // Quick test — simulates a generate_api call with dummy data
-// Visit: http://localhost/BRGYMS/documents/test_api.php
+// Visit: http://localhost/documents/test_api.php
 require_once __DIR__ . '/../config/security.php';
 require_once __DIR__ . '/../config/database.php';
 secure_session_start();
@@ -43,5 +43,5 @@ echo "user_id: " . ($_SESSION['user_id'] ?? 'NOT SET') . "<br>";
 echo "role: " . ($_SESSION['role_name'] ?? 'NOT SET') . "<br>";
 echo "csrf_token: " . (isset($_SESSION['csrf_token']) ? 'SET' : 'NOT SET') . "<br>";
 
-echo "<br><a href='/BRGYMS/documents/issue.php'>← Back to Issue Document</a>";
+echo "<br><a href='/documents/issue.php'>← Back to Issue Document</a>";
 ?>

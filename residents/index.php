@@ -103,7 +103,7 @@ function renderRows($residents, $offset = 0) {
         $age   = $r['age'] ?? null;
 
         $thumb = $r['photo_path']
-            ? '<img src="/BRGYMS/'.htmlspecialchars($r['photo_path'],ENT_QUOTES,'UTF-8').'"
+            ? '<img src="/'.htmlspecialchars($r['photo_path'],ENT_QUOTES,'UTF-8').'"
                    style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border);"
                    alt="photo">'
             : '<div style="width:36px;height:36px;border-radius:50%;background:var(--primary-xlight);
@@ -734,7 +734,7 @@ async function submitAddResident() {
     showToast('error','First name, last name, and birth date are required.'); return;
   }
   try {
-    const resp = await fetch('/BRGYMS/residents/api.php?action=add', { method:'POST', body:fd });
+    const resp = await fetch('/residents/api.php?action=add', { method:'POST', body:fd });
     const text = await resp.text();
     let res;
     try { res = JSON.parse(text); } catch(parseErr) {
@@ -754,7 +754,7 @@ async function loadAddHouseholdHeads() {
   const search = document.getElementById('addHouseholdHeadSearch');
   if (!search) return;
   try {
-    const resp = await fetch('/BRGYMS/residents/api.php?action=get_heads&csrf_token=<?= $csrf ?>');
+    const resp = await fetch('/residents/api.php?action=get_heads&csrf_token=<?= $csrf ?>');
     const data = await resp.json();
     if (!data.success) return;
     window.addHouseholdHeads = data.heads || [];
@@ -823,7 +823,7 @@ document.addEventListener('DOMContentLoaded', () => loadAddHouseholdHeads());
 // ── View Resident — navigate to 360 view page ────────────────────────────────
 function viewResident(btn) {
   const d = JSON.parse(btn.dataset.resident);
-  window.location.href = '/BRGYMS/residents/view.php?id=' + d.id;
+  window.location.href = '/residents/view.php?id=' + d.id;
 }
 
 // ── Archive modal ─────────────────────────────────────────────────────────────
@@ -858,7 +858,7 @@ async function confirmArchive() {
   fd.append('archive_reason',reason_type === 'Other' ? other_text : reason_type);
 
   try {
-    const resp = await fetch('/BRGYMS/residents/api.php?action=archive', { method:'POST', body:fd });
+    const resp = await fetch('/residents/api.php?action=archive', { method:'POST', body:fd });
     const res  = await resp.json();
     if (res.success) {
       showToast('success','Resident archived.');
@@ -875,7 +875,7 @@ async function quickVerify(id) {
   fd.append('csrf_token',    CSRF);
   fd.append('resident_id',   id);
   fd.append('record_status', 'Active');
-  const resp = await fetch('/BRGYMS/residents/api.php?action=change_status', { method:'POST', body:fd });
+  const resp = await fetch('/residents/api.php?action=change_status', { method:'POST', body:fd });
   const res  = await resp.json();
   if (res.success) {
     showToast('success', 'Resident marked as Active.');
@@ -891,7 +891,7 @@ async function acceptAllPending() {
 
   const fd = new FormData();
   fd.append('csrf_token', CSRF);
-  const resp = await fetch('/BRGYMS/residents/api.php?action=accept_all_pending', { method:'POST', body:fd });
+  const resp = await fetch('/residents/api.php?action=accept_all_pending', { method:'POST', body:fd });
   const result = await resp.json();
   if (result.success) {
     showToast('success', `${result.updated} resident record${result.updated === 1 ? '' : 's'} accepted.`);
@@ -900,8 +900,8 @@ async function acceptAllPending() {
 }
 
 // ── Navigation helpers ────────────────────────────────────────────────────────
-function editResident(id)  { window.location.href = '/BRGYMS/residents/edit.php?id=' + id; }
-function requestDoc(id)    { window.location.href = '/BRGYMS/documents/create.php?resident_id=' + id; }
+function editResident(id)  { window.location.href = '/residents/edit.php?id=' + id; }
+function requestDoc(id)    { window.location.href = '/documents/create.php?resident_id=' + id; }
 
 // ── Scroll to folder ──────────────────────────────────────────────────────────
 function scrollToFolder(id) {

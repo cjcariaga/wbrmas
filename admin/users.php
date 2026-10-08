@@ -338,7 +338,7 @@ async function managePermissions(uid, name) {
     cb.closest('.perm-card').style.background  = '#fff';
   });
   // Load current perms
-  const res = await apiRequest('/BRGYMS/admin/users_api.php?action=get_perms', {user_id:uid, csrf_token:'<?= $csrf ?>'});
+  const res = await apiRequest('/admin/users_api.php?action=get_perms', {user_id:uid, csrf_token:'<?= $csrf ?>'});
   if (res.success) {
     res.perms.forEach(pk => {
       const cb = document.querySelector('.perm-cb[value="'+pk+'"]');
@@ -355,7 +355,7 @@ async function managePermissions(uid, name) {
 async function savePermissions() {
   const uid   = document.getElementById('permUserId').value;
   const perms = [...document.querySelectorAll('.perm-cb:checked')].map(cb=>cb.value);
-  const res = await apiRequest('/BRGYMS/admin/users_api.php?action=save_perms', {
+  const res = await apiRequest('/admin/users_api.php?action=save_perms', {
     user_id: uid, perms: JSON.stringify(perms), csrf_token: '<?= $csrf ?>'
   });
   if (res.success) { showToast('success','Permissions saved!'); closeModal('modalPermissions'); }
@@ -367,7 +367,7 @@ async function submitAddUser() {
   const data = Object.fromEntries(new FormData(form));
   if (data.password !== data.confirm_password) { showToast('error','Passwords do not match.'); return; }
   if (data.password.length < 8) { showToast('error','Password must be at least 8 characters.'); return; }
-  const res = await apiRequest('/BRGYMS/admin/users_api.php?action=add', data);
+  const res = await apiRequest('/admin/users_api.php?action=add', data);
   if (res.success) {
     showToast('success','User created! Now assign permissions via the 🛡️ button.');
     closeModal('modalAddUser');
@@ -391,7 +391,7 @@ async function enrollFingerprint(userId, userName) {
       return;
     }
 
-    const saved = await apiRequest('/BRGYMS/fingerprint_api.php?action=save_template', {
+    const saved = await apiRequest('/fingerprint_api.php?action=save_template', {
       csrf_token: '<?= $csrf ?>', user_id: userId, template: result.template, device_info: 'ZKTeco ZK9500'
     });
     if (saved.success) {
@@ -416,7 +416,7 @@ function editUser(d) {
 
 async function submitEditUser() {
   const data = Object.fromEntries(new FormData(document.getElementById('editUserForm')));
-  const res = await apiRequest('/BRGYMS/admin/users_api.php?action=update', data);
+  const res = await apiRequest('/admin/users_api.php?action=update', data);
   if (res.success) { showToast('success','User updated!'); closeModal('modalEditUser'); setTimeout(()=>location.reload(),1200); }
   else showToast('error', res.message||'Failed.');
 }
@@ -432,20 +432,20 @@ function resetPassword(id, username) {
 async function submitResetPw() {
   const data = Object.fromEntries(new FormData(document.getElementById('resetPwForm')));
   if (data.new_password !== data.confirm_new_password) { showToast('error','Passwords do not match.'); return; }
-  const res = await apiRequest('/BRGYMS/admin/users_api.php?action=reset_password', data);
+  const res = await apiRequest('/admin/users_api.php?action=reset_password', data);
   if (res.success) { showToast('success','Password reset!'); closeModal('modalResetPw'); }
   else showToast('error', res.message||'Failed.');
 }
 
 async function unlockUser(id) {
-  const res = await apiRequest('/BRGYMS/admin/users_api.php?action=unlock',{user_id:id,csrf_token:'<?= $csrf ?>'});
+  const res = await apiRequest('/admin/users_api.php?action=unlock',{user_id:id,csrf_token:'<?= $csrf ?>'});
   if (res.success) { showToast('success','Account unlocked!'); setTimeout(()=>location.reload(),1000); }
   else showToast('error','Failed.');
 }
 
 async function toggleUser(id, status, name) {
   if (!confirm((status?'Activate':'Deactivate')+' account for '+name+'?')) return;
-  const res = await apiRequest('/BRGYMS/admin/users_api.php?action=toggle',{user_id:id,is_active:status,csrf_token:'<?= $csrf ?>'});
+  const res = await apiRequest('/admin/users_api.php?action=toggle',{user_id:id,is_active:status,csrf_token:'<?= $csrf ?>'});
   if (res.success) { showToast('success','Done!'); setTimeout(()=>location.reload(),1000); }
   else showToast('error','Failed.');
 }

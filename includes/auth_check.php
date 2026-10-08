@@ -3,11 +3,11 @@ require_once __DIR__ . '/../config/security.php';
 secure_session_start();
 
 if (!isset($_SESSION['user_id'])) {
-    header('Location: /BRGYMS/index.php');
+    header('Location: /index.php');
     exit;
 }
 if (!check_session_timeout()) {
-    header('Location: /BRGYMS/index.php?timeout=1');
+    header('Location: /index.php?timeout=1');
     exit;
 }
 
@@ -17,7 +17,7 @@ function require_role($role_name) {
         http_response_code(403);
         die('<div style="font-family:Inter,sans-serif;text-align:center;padding:60px;color:#c0392b;">
             <h2>403 – Access Denied</h2><p>You do not have permission to access this page.</p>
-            <a href="/BRGYMS/dashboard.php" style="color:#2980b9;">Return to Dashboard</a></div>');
+            <a href="/dashboard.php" style="color:#2980b9;">Return to Dashboard</a></div>');
     }
 }
 
@@ -61,7 +61,7 @@ function require_permission($permission) {
         http_response_code(403);
         die('<div style="font-family:Inter,sans-serif;text-align:center;padding:60px;color:#c0392b;">
             <h2>403 – Access Denied</h2><p>You do not have permission to access this page.</p>
-            <a href="/BRGYMS/dashboard.php" style="color:#2980b9;">Return to Dashboard</a></div>');
+            <a href="/dashboard.php" style="color:#2980b9;">Return to Dashboard</a></div>');
     }
 }
 

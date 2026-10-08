@@ -170,19 +170,19 @@ async function saveFinanceEntry() {
   const data={csrf_token:FINANCE_CSRF,entry_type:document.getElementById('financeType').value,category:document.getElementById('financeCategory').value.trim(),amount:document.getElementById('financeAmount').value,entry_date:document.getElementById('financeDate').value,description:document.getElementById('financeDescription').value.trim()};
   if(!data.category || !data.amount || !data.entry_date || !data.description) { showToast('error','Complete all financial entry fields.'); return; }
   if(id) data.financial_entry_id=id;
-  const result=await apiRequest('/BRGYMS/finance/api.php?action='+(id?'update':'create'),data);
+  const result=await apiRequest('/finance/api.php?action='+(id?'update':'create'),data);
   if(!result.success) { showToast('error',result.message||'Could not save entry.'); return; }
   closeFinanceModal(); showToast('success',result.message); window.location.reload();
 }
 async function deleteFinanceEntry(id) {
   if(!confirm('Delete this financial ledger entry? This action is audit logged.')) return;
-  const result=await apiRequest('/BRGYMS/finance/api.php?action=delete',{csrf_token:FINANCE_CSRF,financial_entry_id:id});
+  const result=await apiRequest('/finance/api.php?action=delete',{csrf_token:FINANCE_CSRF,financial_entry_id:id});
   if(!result.success) { showToast('error',result.message||'Could not delete entry.'); return; }
   showToast('success',result.message); window.location.reload();
 }
 async function importDocumentFees() {
   if(!confirm('Import assessed fees for issued documents not yet in the ledger? These amounts are not proof of cash collection.')) return;
-  const result=await apiRequest('/BRGYMS/finance/api.php?action=import_document_fees',{csrf_token:FINANCE_CSRF});
+  const result=await apiRequest('/finance/api.php?action=import_document_fees',{csrf_token:FINANCE_CSRF});
   if(!result.success) { showToast('error',result.message||'Could not import fees.'); return; }
   showToast('success',result.message); window.location.reload();
 }

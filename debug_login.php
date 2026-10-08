@@ -59,7 +59,7 @@ pre{background:#0f0f1a;padding:12px;border-radius:6px;overflow-x:auto;font-size:
   <tr><td>Username</td><td><strong style="color:#00ff88;">admin</strong></td></tr>
   <tr><td>Password</td><td><strong style="color:#00ff88;">admin123</strong></td></tr>
 </table>
-<a href="/BRGYMS/" class="btn">→ Go Login Now</a>
+<a href="/" class="btn">→ Go Login Now</a>
 <?php else: ?>
 <p class="err">❌ password_verify() failed — something is wrong with PHP or the DB column type.</p>
 <pre>Hash in DB: <?= htmlspecialchars($row['password_hash']) ?></pre>

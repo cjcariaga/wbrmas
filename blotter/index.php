@@ -510,7 +510,7 @@ async function submitCase() {
   if (!hasComplainant || !data.respondent_resident_id || !data.respondent_name || !data.case_type || !data.case_date || !data.case_description || !data.case_location) {
     showToast('error','Please fill in all required fields.'); return;
   }
-  const res = await apiRequest('/BRGYMS/blotter/api.php?action=add', data);
+  const res = await apiRequest('/blotter/api.php?action=add', data);
   if (res.success) {
     showToast('success','Case Report filed! Case No: ' + res.case_number);
     closeModal('modalAddCase');
@@ -613,7 +613,7 @@ async function submitUpdate() {
   if (data.resolution_status === 'Referred' && !data.referred_to) {
     showToast('error','Please specify who the case is referred to.'); return;
   }
-  const res = await apiRequest('/BRGYMS/blotter/api.php?action=update_status', data);
+  const res = await apiRequest('/blotter/api.php?action=update_status', data);
   if (res.success) {
     showToast('success','Case status updated!');
     closeModal('modalUpdateCase');
@@ -623,7 +623,7 @@ async function submitUpdate() {
 
 // ── Print Case Report ───────────────────────────────────────────────────────
 async function printCase(id) {
-  const res = await apiRequest('/BRGYMS/blotter/api.php?action=print', {
+  const res = await apiRequest('/blotter/api.php?action=print', {
     case_id: id, csrf_token: '<?= $csrf ?>'
   });
   if (res.success) printDocument(res.html);

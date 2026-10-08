@@ -26,7 +26,7 @@ if ($pending_count > 0) {
         'icon'  => 'fa-clock',
         'title' => "$pending_count Pending Document Request" . ($pending_count > 1 ? 's' : ''),
         'body'  => 'Awaiting approval or processing.',
-        'link'  => '/BRGYMS/documents/index.php?status=PENDING'
+        'link'  => '/documents/index.php?status=PENDING'
     ];
 }
 
@@ -39,7 +39,7 @@ if ($blotter_count > 0) {
         'icon'  => 'fa-book-open',
         'title' => "$blotter_count Active Blotter Case" . ($blotter_count > 1 ? 's' : ''),
         'body'  => 'Unresolved cases need attention.',
-        'link'  => '/BRGYMS/blotter/index.php?status=Active'
+        'link'  => '/blotter/index.php?status=Active'
     ];
 }
 
@@ -52,7 +52,7 @@ if ($med_count > 0) {
         'icon'  => 'fa-handshake',
         'title' => "$med_count Case" . ($med_count > 1 ? 's' : '') . " Under Mediation",
         'body'  => 'Hearing or mediation in progress.',
-        'link'  => '/BRGYMS/blotter/index.php?status=Under+Mediation'
+        'link'  => '/blotter/index.php?status=Under+Mediation'
     ];
 }
 
@@ -65,7 +65,7 @@ if ($appr_count > 0) {
         'icon'  => 'fa-print',
         'title' => "$appr_count Document" . ($appr_count > 1 ? 's' : '') . " Ready to Print",
         'body'  => 'Approved requests waiting to be issued.',
-        'link'  => '/BRGYMS/documents/index.php?status=APPROVED'
+        'link'  => '/documents/index.php?status=APPROVED'
     ];
 }
 

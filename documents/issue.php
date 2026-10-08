@@ -33,7 +33,7 @@ require_once '../includes/header.php';
     <h2><i class="fas fa-file-plus"></i> Issue Document</h2>
     <p>Select a document type and fill in the required details</p>
   </div>
-  <a href="/BRGYMS/documents/index.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+  <a href="/documents/index.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
 </div>
 
 <!-- Step 1: Select Purok then Search Resident (if none preselected) -->
@@ -95,7 +95,7 @@ require_once '../includes/header.php';
         <?= $resident['is_indigent'] ? ' &nbsp;|&nbsp; <span class="badge badge-warning">Indigent</span>' : '' ?>
       </div>
     </div>
-    <a href="/BRGYMS/documents/issue.php" class="btn btn-secondary btn-sm">
+    <a href="/documents/issue.php" class="btn btn-secondary btn-sm">
       <i class="fas fa-arrow-rotate-left"></i> Change Resident
     </a>
   </div>
@@ -294,7 +294,7 @@ function selectPurok(purok) {
 async function searchResident() {
   const q = document.getElementById('searchName')?.value?.trim();
   if (!q) { showToast('error','Please enter a name to search.'); return; }
-  const res = await apiRequest('/BRGYMS/documents/search_resident.php', {
+  const res = await apiRequest('/documents/search_resident.php', {
     q: q, purok: selectedPurok, csrf_token: '<?= $csrf ?>'
   });
   const box = document.getElementById('searchResults');
@@ -308,7 +308,7 @@ async function searchResident() {
       <td><code>${r.code}</code></td>
       <td><strong>${r.name}</strong></td>
       <td>${r.sex||'—'}</td>
-      <td><a href="/BRGYMS/documents/issue.php?resident_id=${r.id}" class="btn btn-primary btn-sm"><i class="fas fa-check"></i> Select</a></td>
+      <td><a href="/documents/issue.php?resident_id=${r.id}" class="btn btn-primary btn-sm"><i class="fas fa-check"></i> Select</a></td>
     </tr>`;
   });
   html += '</tbody></table></div>';
@@ -395,7 +395,7 @@ async function generateDocument(type) {
   data.purpose_final = purposeVal;
 
   showToast('info','Generating document...');
-  const res = await apiRequest('/BRGYMS/documents/generate_api.php', data);
+  const res = await apiRequest('/documents/generate_api.php', data);
 
   if (res.success) {
     closeModal('modal' + (type === 'clearance' ? 'Clearance' : 'Indigency'));
@@ -406,7 +406,7 @@ async function generateDocument(type) {
     pw.document.close();
     setTimeout(() => { pw.focus(); pw.print(); }, 800);
     // Reload after 3s to reflect new request
-    setTimeout(() => window.location.href = '/BRGYMS/documents/index.php', 3000);
+    setTimeout(() => window.location.href = '/documents/index.php', 3000);
   } else {
     showToast('error', res.message || 'Failed to generate document.');
   }
