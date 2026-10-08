@@ -1,4 +1,7 @@
 <?php
+// TEMPORARY DEBUG — remove after diagnosing the 500
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 $page_title  = 'Master List Report';
 $active_page = 'analytics';
 $breadcrumb  = ['Administration', 'Master List'];

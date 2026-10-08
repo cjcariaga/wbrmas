@@ -1,4 +1,7 @@
 <?php
+// TEMPORARY DEBUG — remove after diagnosing the 500
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 $page_title  = 'Residents';
 $active_page = 'residents';
 $breadcrumb  = ['Residents', 'Records'];

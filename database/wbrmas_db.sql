@@ -54,10 +54,19 @@ CREATE TABLE IF NOT EXISTS tbl_residents (
     years_of_residency INT DEFAULT 0,
     is_indigent BOOLEAN DEFAULT FALSE,
     is_archived BOOLEAN DEFAULT FALSE,
+    photo_path VARCHAR(255) NULL,
+    is_head_of_family BOOLEAN DEFAULT FALSE,
+    household_head_id INT NULL,
+    record_status ENUM('Active','Pending Verification','Archived') NOT NULL DEFAULT 'Pending Verification',
+    archive_reason TEXT NULL,
+    archived_at DATETIME NULL,
+    archived_by INT NULL,
     registered_by INT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (registered_by) REFERENCES tbl_users(user_id)
+    FOREIGN KEY (registered_by) REFERENCES tbl_users(user_id),
+    FOREIGN KEY (household_head_id) REFERENCES tbl_residents(resident_id) ON DELETE SET NULL,
+    FOREIGN KEY (archived_by) REFERENCES tbl_users(user_id) ON DELETE SET NULL
 );
 
 -- External resident portal identities are separate from internal staff users.

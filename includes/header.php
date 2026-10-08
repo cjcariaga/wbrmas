@@ -6,7 +6,7 @@
 <title><?= $page_title ?? 'WBRMAS' ?> – Barangay San Isidro</title>
 <link rel="stylesheet" href="/assets/css/main.css?v=<?= filemtime(__DIR__ . '/../assets/css/main.css') ?>">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-      integrity="sha512-Avb2QiuTny/E8c4z5VJgCl+oFCLJKqv2O2IM6Qn+NaYSJ5Nc1GBWoCH3X0GOWsQhGjl0K3RBGb83SKS/o/0Q=="
+      integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
       crossorigin="anonymous" referrerpolicy="no-referrer">
 <!-- FA fallback if CDN fails -->
 <script>
