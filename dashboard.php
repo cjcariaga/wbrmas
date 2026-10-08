@@ -67,9 +67,10 @@ if ($integrity_sample) {
 $integrity_ok = ($tampered === 0);
 
 // Last backup status
-$last_backup_row = $conn->query(
+$last_backup_result = $conn->query(
     "SELECT created_at, filename FROM tbl_backup_log WHERE status='success' ORDER BY created_at DESC LIMIT 1"
-)->fetch_assoc();
+);
+$last_backup_row = $last_backup_result ? $last_backup_result->fetch_assoc() : null;
 
 require_once 'includes/header.php';
 ?>

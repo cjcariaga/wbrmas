@@ -2,8 +2,6 @@
 -- Web-Based Barangay Records Management and Audit System
 -- Barangay San Isidro, City of Ilagan, Isabela
 
-CREATE DATABASE IF NOT EXISTS wbrmas_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE wbrmas_db;
 
 -- Roles
 CREATE TABLE IF NOT EXISTS tbl_roles (
@@ -23,6 +21,7 @@ CREATE TABLE IF NOT EXISTS tbl_users (
     is_active BOOLEAN DEFAULT TRUE,
     failed_attempts INT DEFAULT 0,
     locked_until DATETIME NULL,
+    last_login DATETIME NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES tbl_roles(role_id)
 );
@@ -234,6 +233,29 @@ CREATE TABLE IF NOT EXISTS tbl_financial_entries (
     FOREIGN KEY (source_request_id) REFERENCES tbl_document_requests(request_id) ON DELETE SET NULL,
     FOREIGN KEY (created_by) REFERENCES tbl_users(user_id) ON DELETE SET NULL,
     FOREIGN KEY (updated_by) REFERENCES tbl_users(user_id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS tbl_backup_config (
+    config_id INT PRIMARY KEY,
+    schedule ENUM('disabled','daily','weekly') NOT NULL DEFAULT 'disabled',
+    backup_path VARCHAR(255) NULL,
+    updated_by INT NULL,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (updated_by) REFERENCES tbl_users(user_id) ON DELETE SET NULL
+);
+INSERT IGNORE INTO tbl_backup_config (config_id, schedule, backup_path) VALUES (1, 'disabled', '');
+
+CREATE TABLE IF NOT EXISTS tbl_backup_log (
+    backup_log_id INT AUTO_INCREMENT PRIMARY KEY,
+    filename VARCHAR(255) NOT NULL,
+    file_path VARCHAR(500) NOT NULL,
+    file_size BIGINT NOT NULL DEFAULT 0,
+    triggered_by VARCHAR(50) NOT NULL,
+    created_by INT NULL,
+    status ENUM('success','failed') NOT NULL,
+    notes TEXT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES tbl_users(user_id) ON DELETE SET NULL
 );
 
 INSERT IGNORE INTO tbl_permissions (perm_key, perm_label, perm_group, description) VALUES
