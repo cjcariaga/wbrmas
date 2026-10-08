@@ -1,0 +1,8 @@
+C:\xampp\htdocs\BRGYMS\fingerprint_bridge\obj\x64\Debug\FingerprintBridge.csproj.AssemblyReference.cache
+C:\xampp\htdocs\BRGYMS\fingerprint_bridge\obj\x64\Debug\FingerprintBridge.csproj.CoreCompileInputs.cache
+C:\xampp\htdocs\BRGYMS\fingerprint_bridge\bin\x64\Debug\FingerprintBridge.exe
+C:\xampp\htdocs\BRGYMS\fingerprint_bridge\bin\x64\Debug\FingerprintBridge.pdb
+C:\xampp\htdocs\BRGYMS\fingerprint_bridge\bin\x64\Debug\libzkfpcsharp.dll
+C:\xampp\htdocs\BRGYMS\fingerprint_bridge\obj\x64\Debug\Fingerpr.836082F7.Up2Date
+C:\xampp\htdocs\BRGYMS\fingerprint_bridge\obj\x64\Debug\FingerprintBridge.exe
+C:\xampp\htdocs\BRGYMS\fingerprint_bridge\obj\x64\Debug\FingerprintBridge.pdb
