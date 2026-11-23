@@ -16,9 +16,8 @@ if (!is_admin()) {
 $conn = getDBConnection();
 
 // ── Check and acquire record lock ─────────────────────────────────────────────
-// Clean expired locks first
-$conn->query("DELETE FROM tbl_record_locks WHERE expires_at < NOW()");
-
+$lock_available = true;
+$lock_warning = null;
 $lock_stmt = $conn->prepare(
     "SELECT l.locked_by, u.full_name, l.expires_at
      FROM tbl_record_locks l
@@ -27,31 +26,48 @@ $lock_stmt = $conn->prepare(
 );
 if (!$lock_stmt) {
     error_log('Resident edit lock query failed: ' . $conn->error);
-    http_response_code(500);
-    exit('Resident edit locking is not configured. Run database/create_resident_record_locks.sql.');
+    $lock_available = false;
 }
-$lock_stmt->bind_param("i", $rid);
-$lock_stmt->execute();
-$existing_lock = $lock_stmt->get_result()->fetch_assoc();
-$lock_stmt->close();
 
 $uid = (int)$_SESSION['user_id'];
-$lock_warning = null;
+if ($lock_available && !$conn->query("DELETE FROM tbl_record_locks WHERE expires_at < NOW()")) {
+    error_log('Resident edit lock cleanup failed: ' . $conn->error);
+    $lock_available = false;
+}
 
-if ($existing_lock && (int)$existing_lock['locked_by'] !== $uid) {
-    // Locked by someone else — show warning but allow viewing (read-only)
+$existing_lock = null;
+if ($lock_available) {
+    if (!$lock_stmt->bind_param("i", $rid) || !$lock_stmt->execute()) {
+        error_log('Resident edit lock lookup failed: ' . $lock_stmt->error);
+        $lock_available = false;
+    } else {
+        $lock_result = $lock_stmt->get_result();
+        if (!$lock_result) {
+            error_log('Resident edit lock result failed: ' . $lock_stmt->error);
+            $lock_available = false;
+        } else {
+            $existing_lock = $lock_result->fetch_assoc();
+        }
+    }
+    $lock_stmt->close();
+}
+
+if ($lock_available && $existing_lock && (int)$existing_lock['locked_by'] !== $uid) {
     $lock_warning = $existing_lock['full_name'];
-} else {
-    // Acquire / renew lock for current user (15 min)
+} elseif ($lock_available) {
     $lk = $conn->prepare(
         "INSERT INTO tbl_record_locks (resident_id, locked_by, locked_at, expires_at)
          VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 15 MINUTE))
          ON DUPLICATE KEY UPDATE locked_by=VALUES(locked_by), locked_at=NOW(),
                                   expires_at=DATE_ADD(NOW(), INTERVAL 15 MINUTE)"
     );
-    $lk->bind_param("ii", $rid, $uid);
-    $lk->execute();
-    $lk->close();
+    if (!$lk || !$lk->bind_param("ii", $rid, $uid) || !$lk->execute()) {
+        error_log('Resident edit lock acquisition failed: ' . ($lk ? $lk->error : $conn->error));
+        $lock_available = false;
+    }
+    if ($lk) {
+        $lk->close();
+    }
 }
 $stmt = $conn->prepare("SELECT * FROM tbl_residents WHERE resident_id=? AND is_archived=0");
 $stmt->bind_param("i", $rid); $stmt->execute();
@@ -89,6 +105,17 @@ require_once '../includes/header.php';
     <span style="font-size:.85rem;color:#856404;">
       This record is currently being edited by <strong><?= sanitize_output($lock_warning) ?></strong>.
       You can view the record but saving is disabled until the lock is released.
+    </span>
+  </div>
+</div>
+<?php elseif (!$lock_available): ?>
+<div style="background:#fff3cd;border:1.5px solid #ffc107;border-radius:10px;padding:14px 18px;
+            margin-bottom:18px;display:flex;align-items:center;gap:12px;">
+  <i class="fas fa-triangle-exclamation" style="color:#d68910;font-size:1.3rem;"></i>
+  <div>
+    <strong style="color:#856404;">Edit lock unavailable</strong><br>
+    <span style="font-size:.85rem;color:#856404;">
+      The resident can still be edited, but simultaneous editing cannot be prevented until the record-lock database setup is fixed.
     </span>
   </div>
 </div>
@@ -334,7 +361,7 @@ function previewPhoto(input) {
 }
 
 // ── Record Lock JS ───────────────────────────────────────────────────────────
-<?php if (!$lock_warning): ?>
+<?php if (!$lock_warning && $lock_available): ?>
 const LOCK_RID  = <?= $rid ?>;
 const LOCK_CSRF = '<?= $csrf ?>';
 let lockSeconds = 15 * 60; // 15 minutes
