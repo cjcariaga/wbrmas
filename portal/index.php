@@ -34,7 +34,8 @@ $status_label = ['STORED'=>'Awaiting Pickup','RELEASED'=>'Released'];
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Resident Portal – Barangay San Isidro</title>
-<link rel="stylesheet" href="/assets/css/main.css">
+<base href="<?= htmlspecialchars(app_url(), ENT_QUOTES, 'UTF-8') ?>">
+<link rel="stylesheet" href="<?= htmlspecialchars(app_url('assets/css/main.css'), ENT_QUOTES, 'UTF-8') ?>">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 body{background:#edf3f1}.portal-layout{min-height:100vh}.portal-top{background:#174d40;color:#fff;padding:14px max(20px,calc((100vw - 1160px)/2));display:flex;align-items:center;justify-content:space-between;gap:14px}.portal-brand{display:flex;align-items:center;gap:12px}.portal-brand img{width:46px;height:46px;object-fit:contain}.portal-brand strong{display:block;font-size:1rem}.portal-brand small{opacity:.8}.portal-top a{color:#fff;text-decoration:none}.portal-main{max-width:1160px;margin:24px auto;padding:0 20px}.portal-welcome{margin-bottom:18px}.portal-welcome h1{font-size:1.35rem;margin:0 0 4px;color:#194e42}.portal-welcome p{margin:0;color:#5b7069;font-size:.9rem}.portal-grid{display:grid;grid-template-columns:320px 1fr;gap:16px;align-items:start}.portal-card{background:#fff;border:1px solid #d9e3df;border-radius:8px;padding:18px}.portal-card h2{font-size:1rem;margin:0 0 14px}.portal-profile-row{padding:8px 0;border-bottom:1px solid #edf1ef;font-size:.86rem}.portal-profile-row:last-child{border-bottom:0}.portal-alert{display:none;margin:12px 0;padding:10px 12px;border-radius:6px;font-size:.85rem}.portal-alert.error{background:#fdecea;color:#942d24}.portal-alert.success{background:#e8f5ee;color:#245c42}.portal-card .form-group{margin-bottom:12px}.request-table td{vertical-align:top}.portal-note{font-size:.78rem;color:#64766f;line-height:1.5;margin-top:10px}@media(max-width:760px){.portal-grid{grid-template-columns:1fr}.portal-top{padding:12px 16px}}
@@ -104,8 +105,8 @@ body{background:#edf3f1}.portal-layout{min-height:100vh}.portal-top{background:#
 <body>
 <div class="portal-layout">
   <header class="portal-top">
-    <div class="portal-brand"><img src="/assets/img/brgy_seal.png" alt="Barangay seal"><div><strong>Barangay San Isidro</strong><small>Resident Services Portal</small></div></div>
-    <div class="portal-account"><span class="portal-avatar" aria-hidden="true"><?= sanitize_output(mb_strtoupper(mb_substr($first_name, 0, 1, 'UTF-8').mb_substr($last_name, 0, 1, 'UTF-8'), 'UTF-8')) ?></span><span class="portal-account-name"><?= sanitize_output($account['username']) ?></span><a href="logout.php" class="portal-signout" aria-label="Sign out" title="Sign out"><i class="fas fa-right-from-bracket" aria-hidden="true"></i><span>Sign Out</span></a></div>
+    <div class="portal-brand"><img src="assets/img/brgy_seal.png" alt="Barangay seal"><div><strong>Barangay San Isidro</strong><small>Resident Services Portal</small></div></div>
+    <div class="portal-account"><span class="portal-avatar" aria-hidden="true"><?= sanitize_output(mb_strtoupper(mb_substr($first_name, 0, 1, 'UTF-8').mb_substr($last_name, 0, 1, 'UTF-8'), 'UTF-8')) ?></span><span class="portal-account-name"><?= sanitize_output($account['username']) ?></span><a href="portal/logout.php" class="portal-signout" aria-label="Sign out" title="Sign out"><i class="fas fa-right-from-bracket" aria-hidden="true"></i><span>Sign Out</span></a></div>
   </header>
   <main class="portal-main">
     <div class="portal-welcome"><h1>Hello, <?= sanitize_output($first_name) ?></h1><p>View your resident information and track document requests.</p></div>
@@ -180,7 +181,7 @@ document.getElementById('portalRequestForm').addEventListener('submit', async ev
   const form=event.currentTarget, error=document.getElementById('requestError'), success=document.getElementById('requestSuccess');
   error.style.display='none'; success.style.display='none';
   try {
-    const response=await fetch('api.php?action=create_request',{method:'POST',body:new FormData(form)});
+    const response=await fetch('portal/api.php?action=create_request',{method:'POST',body:new FormData(form)});
     const result=await response.json();
     if(!result.success){error.textContent=result.message||'Could not submit request.';error.style.display='block';return;}
     success.textContent=`Request ${result.request_code} submitted for staff review.`;success.style.display='block';

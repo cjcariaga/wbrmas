@@ -1,6 +1,30 @@
 <?php
 require_once __DIR__ . '/database.php';
 
+function app_base_path() {
+    static $basePath = null;
+    if ($basePath !== null) return $basePath;
+
+    $documentRoot = realpath($_SERVER['DOCUMENT_ROOT'] ?? '');
+    $applicationRoot = realpath(__DIR__ . '/..');
+    $basePath = '';
+
+    if ($documentRoot !== false && $applicationRoot !== false) {
+        $documentRoot = rtrim(str_replace('\\', '/', $documentRoot), '/');
+        $applicationRoot = str_replace('\\', '/', $applicationRoot);
+        $documentRootPrefix = $documentRoot . '/';
+        if (stripos($applicationRoot, $documentRootPrefix) === 0) {
+            $basePath = '/' . trim(substr($applicationRoot, strlen($documentRootPrefix)), '/');
+        }
+    }
+
+    return $basePath;
+}
+
+function app_url($path = '') {
+    return app_base_path() . '/' . ltrim($path, '/');
+}
+
 // ─── AES-256 Field-Level Encryption ───────────────────────────────────────────
 function aes_encrypt($plaintext) {
     if ($plaintext === null || $plaintext === '') return '';

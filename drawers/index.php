@@ -140,7 +140,7 @@ require_once '../includes/header.php';
 <?php else: ?>
 <div class="d-flex justify-between align-center mb-2 flex-wrap gap-2">
   <h3 style="margin:0;"><?= $selected_drawer ? sanitize_output($selected_drawer['drawer_name']) : 'Drawers' ?></h3>
-  <?php if ($selected_drawer): ?><a class="btn btn-secondary btn-sm" href="index.php"><i class="fas fa-arrow-left"></i> All Drawers</a><?php endif; ?>
+  <?php if ($selected_drawer): ?><a class="btn btn-secondary btn-sm" href="drawers/index.php"><i class="fas fa-arrow-left"></i> All Drawers</a><?php endif; ?>
 </div>
 <?php if (!$selected_drawer): ?>
   <?php if ($drawers): ?>
@@ -226,7 +226,7 @@ require_once '../includes/header.php';
 const DRAWER_CSRF = <?= json_encode($csrf) ?>;
 const DRAWER_CURRENT_ID = <?= (int)$drawer_id ?>;
 const DRAWER_CURRENT_SEARCH = <?= json_encode($search) ?>;
-const DRAWER_API = '/drawers/api.php?action=';
+const DRAWER_API = 'drawers/api.php?action=';
 
 function openDrawerModal() {
   document.getElementById('drawerEditId').value = '';

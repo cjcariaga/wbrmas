@@ -91,7 +91,7 @@ require_once 'includes/header.php';
     </p>
   </div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;">
-    <a href="/documents/create.php"
+    <a href="documents/create.php"
        style="background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.3);
               padding:9px 18px;border-radius:8px;font-size:.82rem;font-weight:600;text-decoration:none;
               display:flex;align-items:center;gap:6px;transition:background .2s;"
@@ -99,7 +99,7 @@ require_once 'includes/header.php';
        onmouseout="this.style.background='rgba(255,255,255,.15)'">
       <i class="fas fa-plus"></i> New Request
     </a>
-    <a href="/residents/index.php"
+    <a href="residents/index.php"
        style="background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.3);
               padding:9px 18px;border-radius:8px;font-size:.82rem;font-weight:600;text-decoration:none;
               display:flex;align-items:center;gap:6px;transition:background .2s;"
@@ -126,7 +126,7 @@ require_once 'includes/header.php';
       <div style="font-size:1.8rem;font-weight:800;color:var(--text);line-height:1;"><?= number_format($stats['residents']) ?></div>
       <div style="font-size:.75rem;color:var(--text-muted);margin-top:3px;font-weight:500;">Registered Residents</div>
     </div>
-    <a href="/residents/index.php" style="font-size:.72rem;color:#2980b9;text-decoration:none;font-weight:600;">
+    <a href="residents/index.php" style="font-size:.72rem;color:#2980b9;text-decoration:none;font-weight:600;">
       View all <i class="fas fa-arrow-right" style="font-size:.65rem;"></i>
     </a>
   </div>
@@ -144,7 +144,7 @@ require_once 'includes/header.php';
       <div style="font-size:1.8rem;font-weight:800;color:var(--text);line-height:1;"><?= number_format($stats['docs_today']) ?></div>
       <div style="font-size:.75rem;color:var(--text-muted);margin-top:3px;font-weight:500;">Documents Today</div>
     </div>
-    <a href="/documents/index.php" style="font-size:.72rem;color:#27ae60;text-decoration:none;font-weight:600;">
+    <a href="documents/index.php" style="font-size:.72rem;color:#27ae60;text-decoration:none;font-weight:600;">
       View all <i class="fas fa-arrow-right" style="font-size:.65rem;"></i>
     </a>
   </div>
@@ -164,7 +164,7 @@ require_once 'includes/header.php';
         <?= is_admin() ? 'Pending Requests' : 'My Pending' ?>
       </div>
     </div>
-    <a href="/documents/index.php?status=PENDING" style="font-size:.72rem;color:#d68910;text-decoration:none;font-weight:600;">
+    <a href="documents/index.php?status=PENDING" style="font-size:.72rem;color:#d68910;text-decoration:none;font-weight:600;">
       View all <i class="fas fa-arrow-right" style="font-size:.65rem;"></i>
     </a>
   </div>
@@ -182,7 +182,7 @@ require_once 'includes/header.php';
       <div style="font-size:1.8rem;font-weight:800;color:var(--text);line-height:1;"><?= number_format($stats['blotter']) ?></div>
       <div style="font-size:.75rem;color:var(--text-muted);margin-top:3px;font-weight:500;">Active Blotter Cases</div>
     </div>
-    <a href="/blotter/index.php" style="font-size:.72rem;color:#e74c3c;text-decoration:none;font-weight:600;">
+    <a href="blotter/index.php" style="font-size:.72rem;color:#e74c3c;text-decoration:none;font-weight:600;">
       View all <i class="fas fa-arrow-right" style="font-size:.65rem;"></i>
     </a>
   </div>
@@ -200,7 +200,7 @@ require_once 'includes/header.php';
       <div style="font-size:1.8rem;font-weight:800;color:var(--text);line-height:1;"><?= number_format($stats['docs_total']) ?></div>
       <div style="font-size:.75rem;color:var(--text-muted);margin-top:3px;font-weight:500;">Total Issued Documents</div>
     </div>
-    <a href="/documents/index.php?status=PRINTED" style="font-size:.72rem;color:#673ab7;text-decoration:none;font-weight:600;">
+    <a href="documents/index.php?status=PRINTED" style="font-size:.72rem;color:#673ab7;text-decoration:none;font-weight:600;">
       View all <i class="fas fa-arrow-right" style="font-size:.65rem;"></i>
     </a>
   </div>
@@ -219,7 +219,7 @@ require_once 'includes/header.php';
       <div style="font-size:1.8rem;font-weight:800;color:var(--text);line-height:1;"><?= number_format($stats['users']) ?></div>
       <div style="font-size:.75rem;color:var(--text-muted);margin-top:3px;font-weight:500;">Active Staff</div>
     </div>
-    <a href="/admin/users.php" style="font-size:.72rem;color:#2980b9;text-decoration:none;font-weight:600;">
+    <a href="admin/users.php" style="font-size:.72rem;color:#2980b9;text-decoration:none;font-weight:600;">
       Manage <i class="fas fa-arrow-right" style="font-size:.65rem;"></i>
     </a>
   </div>
@@ -250,7 +250,7 @@ require_once 'includes/header.php';
     <i class="fas fa-database"></i> No backup yet
   </span>
   <?php endif; ?>
-  <a href="/admin/backup.php"
+  <a href="admin/backup.php"
      style="margin-left:auto;color:var(--primary);font-size:.75rem;font-weight:600;text-decoration:none;
             display:flex;align-items:center;gap:4px;">
     <i class="fas fa-gear"></i> Manage Backup
@@ -275,7 +275,7 @@ require_once 'includes/header.php';
           <div style="font-size:.72rem;color:var(--text-muted);">Latest transactions</div>
         </div>
       </div>
-      <a href="/documents/index.php" class="btn btn-primary btn-sm">View All</a>
+      <a href="documents/index.php" class="btn btn-primary btn-sm">View All</a>
     </div>
     <div class="table-wrapper" style="margin:0;">
       <table style="font-size:.82rem;">
@@ -333,7 +333,7 @@ require_once 'includes/header.php';
           <div style="font-size:.72rem;color:var(--text-muted);">Active case reports</div>
         </div>
       </div>
-      <a href="/blotter/index.php" class="btn btn-primary btn-sm">View All</a>
+      <a href="blotter/index.php" class="btn btn-primary btn-sm">View All</a>
     </div>
     <div class="table-wrapper" style="margin:0;">
       <table style="font-size:.82rem;">

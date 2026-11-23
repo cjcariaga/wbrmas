@@ -74,7 +74,7 @@ $r['contact_number']= aes_decrypt($r['contact_number']);
 $csrf = generate_csrf_token();
 
 $photo_url = $r['photo_path']
-    ? '/' . htmlspecialchars($r['photo_path'], ENT_QUOTES, 'UTF-8')
+    ? htmlspecialchars(app_url($r['photo_path']), ENT_QUOTES, 'UTF-8')
     : null;
 
 require_once '../includes/header.php';
@@ -85,7 +85,7 @@ require_once '../includes/header.php';
     <p>Updating record for <strong><?= sanitize_output($r['last_name'].', '.$r['first_name']) ?></strong>
        — <code><?= sanitize_output($r['resident_code']) ?></code></p>
   </div>
-  <a href="index.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+  <a href="residents/index.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
 </div>
 
 <?php if ($lock_warning): ?>
@@ -287,7 +287,7 @@ require_once '../includes/header.php';
       </div>
 
       <div class="d-flex gap-2 mt-3" style="justify-content:flex-end;">
-        <a href="index.php" class="btn btn-secondary">Cancel</a>
+        <a href="residents/index.php" class="btn btn-secondary">Cancel</a>
         <button type="button" class="btn btn-primary" onclick="submitEdit()"
                 id="saveBtn" <?= $lock_warning ? 'disabled title="Record is locked by '.$lock_warning.'"' : '' ?>>
           <i class="fas fa-save"></i> Update Resident
@@ -370,7 +370,7 @@ setInterval(async () => {
   const fd = new FormData();
   fd.append('csrf_token',  LOCK_CSRF);
   fd.append('resident_id', LOCK_RID);
-  await fetch('/residents/api.php?action=heartbeat', { method:'POST', body:fd });
+  await fetch('residents/api.php?action=heartbeat', { method:'POST', body:fd });
   lockSeconds = 15 * 60; // reset countdown
 }, 4 * 60 * 1000);
 
@@ -379,7 +379,7 @@ async function releaseLock() {
   const fd = new FormData();
   fd.append('csrf_token',  LOCK_CSRF);
   fd.append('resident_id', LOCK_RID);
-  navigator.sendBeacon('/residents/api.php?action=unlock', fd);
+  navigator.sendBeacon('residents/api.php?action=unlock', fd);
 }
 window.addEventListener('beforeunload', releaseLock);
 window.addEventListener('pagehide',     releaseLock);
@@ -398,7 +398,7 @@ const CURRENT_HH  = <?= (int)($r['household_head_id'] ?? 0) ?>;
 
 async function loadHouseholdHeads() {
   try {
-    const resp = await fetch('/residents/api.php?action=get_heads&csrf_token=<?= $csrf ?>');
+    const resp = await fetch('residents/api.php?action=get_heads&csrf_token=<?= $csrf ?>');
     const data = await resp.json();
     if (!data.success) return;
     window.editHouseholdHeads = (data.heads || []).filter(h => h.id !== CURRENT_RID);
@@ -481,7 +481,7 @@ async function submitEdit() {
   if (saveBtn) saveBtn.disabled = true;
 
   try {
-    const resp = await fetch('/residents/api.php?action=update', { method: 'POST', body: fd });
+    const resp = await fetch('residents/api.php?action=update', { method: 'POST', body: fd });
     const text = await resp.text();
     let res;
     try { res = JSON.parse(text); } catch (_) {
@@ -492,7 +492,7 @@ async function submitEdit() {
 
     if (res.success) {
       showToast('success', 'Resident updated successfully!');
-      setTimeout(() => window.location.href = 'index.php', 1000);
+      setTimeout(() => window.location.href = 'residents/index.php', 1000);
     } else {
       showToast('error', res.message || 'Update failed.');
       if (saveBtn) saveBtn.disabled = false;

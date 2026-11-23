@@ -60,7 +60,7 @@ require_once '../includes/header.php';
     <p>Resident-linked health history and program enrollment</p>
   </div>
   <div class="d-flex gap-2">
-    <a href="analytics.php" class="btn btn-secondary"><i class="fas fa-chart-column"></i> Analytics</a>
+    <a href="health/analytics.php" class="btn btn-secondary"><i class="fas fa-chart-column"></i> Analytics</a>
     <?php if ($can_manage): ?>
     <button type="button" class="btn btn-primary" onclick="openHealthModal()"><i class="fas fa-plus"></i> Add Record</button>
     <?php endif; ?>
@@ -75,11 +75,11 @@ require_once '../includes/header.php';
            value="<?= sanitize_output($search) ?>" placeholder="Search resident code or health record text...">
   </div>
   <button type="submit" class="btn btn-secondary"><i class="fas fa-search"></i> Search</button>
-  <?php if ($search !== '' || $resident_filter): ?><a href="index.php" class="btn btn-secondary">Clear</a><?php endif; ?>
+  <?php if ($search !== '' || $resident_filter): ?><a href="health/index.php" class="btn btn-secondary">Clear</a><?php endif; ?>
 </form>
 
 <?php if ($resident_filter): ?>
-<div class="mb-3"><a href="index.php" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> All Residents</a></div>
+<div class="mb-3"><a href="health/index.php" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> All Residents</a></div>
 <?php endif; ?>
 
 <div class="card">
@@ -94,7 +94,7 @@ require_once '../includes/header.php';
         <tbody>
         <?php if ($page_records): foreach ($page_records as $record): ?>
           <tr>
-            <td><a href="/residents/view.php?id=<?= (int)$record['resident_id'] ?>"><code><?= sanitize_output($record['resident_code']) ?></code></a></td>
+            <td><a href="residents/view.php?id=<?= (int)$record['resident_id'] ?>"><code><?= sanitize_output($record['resident_code']) ?></code></a></td>
             <td><?= sanitize_output($type_labels[$record['record_type']] ?? 'Health Record') ?></td>
             <td><strong><?= sanitize_output($record['item_name']) ?></strong></td>
             <td><?= sanitize_output($record['event_date'] ?: '—') ?></td>
@@ -210,13 +210,13 @@ async function saveHealthRecord() {
   if (!data.resident_id || !data.item_name) { showToast('error', 'Select a resident and enter the item.'); return; }
   const action = recordId ? 'update' : 'create';
   if (recordId) data.health_record_id = recordId;
-  const result = await apiRequest('/health/api.php?action=' + action, data);
+  const result = await apiRequest('health/api.php?action=' + action, data);
   if (!result.success) { showToast('error', result.message || 'Could not save health record.'); return; }
   showToast('success', result.message || 'Health record saved.');
   const params = new URLSearchParams();
   if (HEALTH_FILTER_RESIDENT) params.set('resident_id', HEALTH_FILTER_RESIDENT);
   if (HEALTH_FILTER_QUERY) params.set('q', HEALTH_FILTER_QUERY);
-  window.location.href = 'index.php' + (params.toString() ? '?' + params.toString() : '');
+  window.location.href = 'health/index.php' + (params.toString() ? '?' + params.toString() : '');
 }
 <?php if ($resident_filter && (int)($_GET['add'] ?? 0) === 1): ?>
 openHealthModal();

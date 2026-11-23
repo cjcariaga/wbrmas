@@ -31,7 +31,7 @@ require_once '../includes/header.php';
     <h2><i class="fas fa-file-plus"></i> New Document Request</h2>
     <p>Create a new document issuance request for a resident</p>
   </div>
-  <a href="index.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+  <a href="documents/index.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
 </div>
 
 <div class="card" style="max-width:700px;">
@@ -114,7 +114,7 @@ require_once '../includes/header.php';
       </div>
 
       <div class="d-flex gap-2 mt-3" style="justify-content:flex-end;">
-        <a href="index.php" class="btn btn-secondary">Cancel</a>
+        <a href="documents/index.php" class="btn btn-secondary">Cancel</a>
         <button type="button" class="btn btn-primary" onclick="submitRequest()">
           <i class="fas fa-paper-plane"></i> Submit Request
         </button>
@@ -354,14 +354,14 @@ async function submitRequest(){
   // Debug — remove after confirming purpose saves correctly
   console.log('Submitting purpose:', sel, '| is_student:', is_student, '| is_loan:', is_loan);
 
-  const res = await apiRequest('/documents/api.php?action=create', {
+  const res = await apiRequest('documents/api.php?action=create', {
     resident_id: rid, document_type_id: dtid, purpose: sel,
     is_student, is_loan, csrf_token: '<?= $csrf ?>'
   });
   if (res.success) {
     const feeLabel = res.is_free ? 'FREE' : '₱' + parseFloat(res.fee).toFixed(2);
     showToast('success', 'Request submitted! Code: ' + res.code + ' | Fee: ' + feeLabel);
-    setTimeout(() => window.location.href = 'index.php', 1800);
+    setTimeout(() => window.location.href = 'documents/index.php', 1800);
   } else {
     showToast('error', res.message || 'Failed to submit.');
   }

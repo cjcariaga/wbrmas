@@ -50,7 +50,7 @@ require_once '../includes/header.php';
     <h2><i class="fas fa-chart-column"></i> Health Records Analytics</h2>
     <p>Descriptive counts from recorded health entries</p>
   </div>
-  <a href="index.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Health Records</a>
+  <a href="health/index.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Health Records</a>
 </div>
 
 <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:20px;">

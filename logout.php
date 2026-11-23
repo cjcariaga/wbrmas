@@ -27,6 +27,6 @@ if (ini_get('session.use_cookies')) {
 session_destroy();
 
 // Redirect to login with logout flag
-header('Location: /index.php?logged_out=1');
+header('Location: ' . app_url('index.php?logged_out=1'));
 exit;
 ?>

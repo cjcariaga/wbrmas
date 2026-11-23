@@ -54,7 +54,7 @@ $verify = password_verify($password, $row['password_hash']);
     <tr><td>Account active</td><td><?= $row['is_active'] ? '✅ Active' : '❌ Inactive' ?></td></tr>
     <tr><td>Locked</td><td>No</td></tr>
   </table>
-  <a href="/" class="btn">→ Go to Login Page</a>
+  <a href="index.php" class="btn">→ Go to Login Page</a>
   <p class="warn">⚠️ Delete fix_login.php after logging in!</p>
 
 <?php else: ?>

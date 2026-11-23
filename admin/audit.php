@@ -72,7 +72,7 @@ require_once '../includes/header.php';
     <p>Cryptographically verified transaction log — HMAC-SHA256 protected</p>
   </div>
   <div class="d-flex gap-2">
-    <a href="audit_export.php?<?= http_build_query($_GET) ?>" class="btn btn-secondary">
+    <a href="admin/audit_export.php?<?= http_build_query($_GET) ?>" class="btn btn-secondary">
       <i class="fas fa-file-export"></i> Export CSV
     </a>
   </div>
@@ -125,7 +125,7 @@ require_once '../includes/header.php';
       <label class="d-flex align-center gap-1" style="font-size:.8rem;">From <input type="date" name="date_from" class="form-control" value="<?= sanitize_output($filter_from) ?>"></label>
       <label class="d-flex align-center gap-1" style="font-size:.8rem;">To <input type="date" name="date_to" class="form-control" value="<?= sanitize_output($filter_to) ?>"></label>
       <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filter</button>
-      <a href="audit.php" class="btn btn-secondary"><i class="fas fa-rotate-left"></i> Reset</a>
+      <a href="admin/audit.php" class="btn btn-secondary"><i class="fas fa-rotate-left"></i> Reset</a>
     </form>
   </div>
 </div>

@@ -1,10 +1,15 @@
 <?php
 // Database Configuration
-define('DB_HOST', 'localhost');
-define('DB_USER', 'u988863428_wbrmas_user');
-define('DB_PASS', 'Wbrmas_pass1');
-define('DB_NAME', 'u988863428_wbrmas_db');
+// define('DB_HOST', 'localhost');
+// define('DB_USER', 'u988863428_wbrmas_user');
+// define('DB_PASS', 'Wbrmas_pass1');
+// define('DB_NAME', 'u988863428_wbrmas_db');
 
+
+define('DB_HOST', 'localhost');
+define('DB_USER', 'localhost');
+define('DB_PASS', '');
+define('DB_NAME', 'wbrmas_db');
 // Security Keys
 define('AES_SECRET_KEY', 'WBRMAS@AES256Key!2024#SecureBarangay');
 define('HMAC_SECRET_KEY', 'WBRMAS@HMAC256Key!2024#AuditIntegrity');
