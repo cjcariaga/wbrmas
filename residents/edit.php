@@ -15,19 +15,6 @@ if (!is_admin()) {
 
 $conn = getDBConnection();
 
-// Create the lock table automatically for databases that missed the migration.
-$conn->query("CREATE TABLE IF NOT EXISTS tbl_record_locks (
-    lock_id INT AUTO_INCREMENT PRIMARY KEY,
-    resident_id INT NOT NULL,
-    locked_by INT NOT NULL,
-    locked_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    expires_at DATETIME NOT NULL,
-    UNIQUE KEY uq_record_lock_resident (resident_id),
-    INDEX idx_record_lock_expiry (expires_at),
-    FOREIGN KEY (resident_id) REFERENCES tbl_residents(resident_id) ON DELETE CASCADE,
-    FOREIGN KEY (locked_by) REFERENCES tbl_users(user_id) ON DELETE CASCADE
-) ENGINE=InnoDB");
-
 // ── Check and acquire record lock ─────────────────────────────────────────────
 // Clean expired locks first
 $conn->query("DELETE FROM tbl_record_locks WHERE expires_at < NOW()");
@@ -38,6 +25,11 @@ $lock_stmt = $conn->prepare(
      JOIN tbl_users u ON l.locked_by = u.user_id
      WHERE l.resident_id = ? LIMIT 1"
 );
+if (!$lock_stmt) {
+    error_log('Resident edit lock query failed: ' . $conn->error);
+    http_response_code(500);
+    exit('Resident edit locking is not configured. Run database/create_resident_record_locks.sql.');
+}
 $lock_stmt->bind_param("i", $rid);
 $lock_stmt->execute();
 $existing_lock = $lock_stmt->get_result()->fetch_assoc();
