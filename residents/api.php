@@ -220,8 +220,8 @@ elseif ($action === 'update') {
     );
     $ef=aes_encrypt($first); $em=aes_encrypt($middle); $el=aes_encrypt($last);
     $eb=aes_encrypt($bdate); $ec=aes_encrypt($contact);
-    // 17 parameters: 12 strings followed by 5 integers
-    $stmt->bind_param("ssssssssssssiiiii",
+    // 17 parameters: 11 strings, 2 integers, 1 string, and 3 integers
+    $stmt->bind_param("sssssssssssiisiii",
         $ef,$em,$el,$eb,$sex,$civil,$ec,$email,$address,$purok,$drawer,$photo_path,
         $years,$indigent,$is_head,$hh_id_val,$rid
     );
