@@ -384,62 +384,114 @@ const CURRENT_RID = <?= $rid ?>;
 const CURRENT_HH  = <?= (int)($r['household_head_id'] ?? 0) ?>;
 
 async function loadHouseholdHeads() {
-  const sel = document.getElementById('householdHeadSelect');
-  if (!sel) return;
   try {
     const resp = await fetch('/residents/api.php?action=get_heads&csrf_token=<?= $csrf ?>');
     const data = await resp.json();
     if (!data.success) return;
-    while (sel.options.length > 1) sel.remove(1);
-    data.heads.forEach(h => {
-      if (h.id === CURRENT_RID) return;
-      const opt = new Option(`[${h.code}] ${h.name}${h.purok?' — '+h.purok:''}`, h.id);
-      if (h.id === CURRENT_HH) opt.selected = true;
-      sel.add(opt);
-    });
+    window.editHouseholdHeads = (data.heads || []).filter(h => h.id !== CURRENT_RID);
+
+    const current = window.editHouseholdHeads.find(h => String(h.id) === String(CURRENT_HH));
+    if (current) {
+      document.getElementById('hhHiddenInput').value = String(current.id);
+      document.getElementById('hhSearchInput').value = `[${current.code}] ${current.name}${current.purok ? ' — ' + current.purok : ''}`;
+    }
   } catch(e) {}
 }
 
+function filterHHOptions(query) {
+  const q = (query || '').toLowerCase().trim();
+  const dropdown = document.getElementById('hhDropdown');
+  document.getElementById('hhHiddenInput').value = '';
+  const heads = (window.editHouseholdHeads || []).filter(h =>
+    `${h.name} ${h.code} ${h.purok || ''}`.toLowerCase().includes(q)
+  );
+
+  if (!heads.length) {
+    dropdown.innerHTML = '<div style="padding:10px;color:var(--text-muted);font-size:.8rem;">No household head found.</div>';
+  } else {
+    dropdown.innerHTML = heads.map(h => `<button type="button" onclick="selectHH(${h.id}, this)"
+      style="display:block;width:100%;padding:9px 11px;border:0;border-bottom:1px solid var(--border);background:#fff;text-align:left;cursor:pointer;font-size:.82rem;">
+      <strong>${escapeHHText(h.name)}</strong><br>
+      <small style="color:var(--text-muted);">[${escapeHHText(h.code)}]${h.purok ? ' — ' + escapeHHText(h.purok) : ''}</small>
+    </button>`).join('');
+  }
+  dropdown.style.display = 'block';
+}
+
+function showHHDropdown() {
+  if (!window.editHouseholdHeads) loadHouseholdHeads().then(() => filterHHOptions(document.getElementById('hhSearchInput').value));
+  else filterHHOptions(document.getElementById('hhSearchInput').value);
+}
+
+function selectHH(id, button) {
+  const head = (window.editHouseholdHeads || []).find(h => String(h.id) === String(id));
+  if (!head) return;
+  document.getElementById('hhHiddenInput').value = String(head.id);
+  document.getElementById('hhSearchInput').value = `[${head.code}] ${head.name}${head.purok ? ' — ' + head.purok : ''}`;
+  document.getElementById('hhDropdown').style.display = 'none';
+  document.getElementById('hhHint').textContent = 'Selected household head.';
+}
+
+function escapeHHText(value) {
+  return String(value || '').replace(/[&<>''"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[char]));
+}
+
+document.addEventListener('click', event => {
+  const dropdown = document.getElementById('hhDropdown');
+  const search = document.getElementById('hhSearchInput');
+  if (dropdown && search && !dropdown.contains(event.target) && event.target !== search) dropdown.style.display = 'none';
+});
+
 function toggleHouseholdHead() {
   const isHead = document.getElementById('isHeadChk').checked;
-  const grp    = document.getElementById('householdHeadGroup');
+  const grp = document.getElementById('householdHeadGroup');
   if (grp) grp.style.display = isHead ? 'none' : 'block';
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const isHead = document.getElementById('isHeadChk')?.checked;
-  if (!isHead) loadHouseholdHeads();
-});
-
 async function submitEdit() {
   const form = document.getElementById('editForm');
+  if (!form.reportValidity()) return;
 
-  // Client-side required check
-  const fn = form.querySelector('[name=first_name]').value.trim();
-  const ln = form.querySelector('[name=last_name]').value.trim();
-  if (!fn || !ln) { showToast('error', 'First name and last name are required.'); return; }
+  const firstName = form.querySelector('[name=first_name]').value.trim();
+  const lastName = form.querySelector('[name=last_name]').value.trim();
+  if (!firstName || !lastName) {
+    showToast('error', 'First name and last name are required.');
+    return;
+  }
 
   const fd = new FormData(form);
-  fd.set('is_indigent',        form.querySelector('[name=is_indigent]')?.checked       ? '1' : '0');
-  fd.set('is_head_of_family',  form.querySelector('[name=is_head_of_family]')?.checked ? '1' : '0');
-  const hhSel = form.querySelector('[name=household_head_id]');
-  fd.set('household_head_id', hhSel ? (hhSel.value || '0') : '0');
+  fd.set('is_indigent', form.querySelector('[name=is_indigent]')?.checked ? '1' : '0');
+  fd.set('is_head_of_family', form.querySelector('[name=is_head_of_family]')?.checked ? '1' : '0');
+  fd.set('household_head_id', document.getElementById('hhHiddenInput')?.value || '0');
+
+  const saveBtn = document.getElementById('saveBtn');
+  if (saveBtn) saveBtn.disabled = true;
 
   try {
-    const resp = await fetch('/residents/api.php?action=update', {
-      method: 'POST',
-      body: fd   // no Content-Type header — browser sets multipart boundary automatically
-    });
-    const res = await resp.json();
+    const resp = await fetch('/residents/api.php?action=update', { method: 'POST', body: fd });
+    const text = await resp.text();
+    let res;
+    try { res = JSON.parse(text); } catch (_) {
+      showToast('error', 'Server error while updating resident.');
+      if (saveBtn) saveBtn.disabled = false;
+      return;
+    }
+
     if (res.success) {
       showToast('success', 'Resident updated successfully!');
-      setTimeout(() => window.location.href = 'index.php', 1500);
+      setTimeout(() => window.location.href = 'index.php', 1000);
     } else {
       showToast('error', res.message || 'Update failed.');
+      if (saveBtn) saveBtn.disabled = false;
     }
-  } catch(e) {
+  } catch (_) {
     showToast('error', 'Network error. Please try again.');
+    if (saveBtn) saveBtn.disabled = false;
   }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!document.getElementById('isHeadChk')?.checked) loadHouseholdHeads();
+});
 </script>
 <?php require_once '../includes/footer.php'; ?>

@@ -155,6 +155,7 @@ elseif ($action === 'update') {
     $email   = sanitize_input($_POST['email']          ?? '');
     $address = sanitize_input($_POST['address']        ?? '');
     $purok   = sanitize_input($_POST['purok']          ?? '');
+    $drawer  = sanitize_input($_POST['drawer_location'] ?? '');
     $years   = (int)($_POST['years_of_residency']      ?? 0);
     $indigent= (int)($_POST['is_indigent']             ?? 0);
     $is_head = (int)($_POST['is_head_of_family']       ?? 0);
@@ -200,16 +201,16 @@ elseif ($action === 'update') {
     $stmt = $conn->prepare(
         "UPDATE tbl_residents
          SET first_name=?,middle_name=?,last_name=?,birth_date=?,sex=?,civil_status=?,
-             contact_number=?,email=?,address=?,purok=?,years_of_residency=?,is_indigent=?,
+             contact_number=?,email=?,address=?,purok=?,drawer_location=?,years_of_residency=?,is_indigent=?,
              photo_path=?,is_head_of_family=?,household_head_id=?
          WHERE resident_id=?"
     );
     $ef=aes_encrypt($first); $em=aes_encrypt($middle); $el=aes_encrypt($last);
     $eb=aes_encrypt($bdate); $ec=aes_encrypt($contact);
-    // 16 params: s×10 + i×2 + s + i×2 + i = ssssssssssiisiii
-    $stmt->bind_param("ssssssssssiisiii",
-        $ef,$em,$el,$eb,$sex,$civil,$ec,$email,$address,$purok,$years,$indigent,
-        $photo_path,$is_head,$hh_id_val,$rid
+    // 17 parameters: 12 strings followed by 5 integers
+    $stmt->bind_param("ssssssssssssiiiii",
+        $ef,$em,$el,$eb,$sex,$civil,$ec,$email,$address,$purok,$drawer,$photo_path,
+        $years,$indigent,$is_head,$hh_id_val,$rid
     );
     if ($stmt->execute()) {
         write_audit_log($uid, 'UPDATE_RESIDENT', "resident_id:$rid", "Name:$last,$first");
