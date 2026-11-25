@@ -9,6 +9,7 @@ $conn = getDBConnection();
 require_once '../includes/drawer_index.php';
 ensure_default_drawers($conn);
 $csrf = generate_csrf_token();
+$documents_url = app_url('documents/index.php');
 $filter   = sanitize_input($_GET['status'] ?? '');
 $allowed_statuses = ['PENDING','APPROVED','STORED','RELEASED','PRINTED','REJECTED'];
 if (!in_array($filter, $allowed_statuses, true)) {
@@ -222,28 +223,28 @@ require_once '../includes/header.php';
 <!-- Status Filter Tabs + View Toggle -->
 <div class="d-flex gap-2 mb-3 flex-wrap align-center justify-between">
   <div class="d-flex gap-2 flex-wrap">
-    <a href="?dview=<?= $doc_view ?>&drawer=<?= urlencode($drawer_search) ?>&pickup=<?= urlencode($pickup_mode) ?>&pickup_date=<?= urlencode($pickup_date) ?>&sort=<?= $sort_pickup?'pickup':'' ?>" class="btn <?= !$filter?'btn-primary':'btn-secondary' ?>">All <span class="badge badge-secondary" style="margin-left:4px;"><?= $total ?></span></a>
+    <a href="<?= sanitize_output($documents_url) ?>?dview=<?= $doc_view ?>&drawer=<?= urlencode($drawer_search) ?>&pickup=<?= urlencode($pickup_mode) ?>&pickup_date=<?= urlencode($pickup_date) ?>&sort=<?= $sort_pickup?'pickup':'' ?>" class="btn <?= !$filter?'btn-primary':'btn-secondary' ?>">All <span class="badge badge-secondary" style="margin-left:4px;"><?= $total ?></span></a>
     <?php
     $tab_colors = ['PENDING'=>'btn-warning','APPROVED'=>'btn-primary','STORED'=>'btn-warning','RELEASED'=>'btn-success','PRINTED'=>'btn-secondary','REJECTED'=>'btn-danger'];
     foreach($counts as $s=>$c):
     ?>
-    <a href="?status=<?= $s ?>&dview=<?= $doc_view ?>&drawer=<?= urlencode($drawer_search) ?>&pickup=<?= urlencode($pickup_mode) ?>&pickup_date=<?= urlencode($pickup_date) ?>&sort=<?= $sort_pickup?'pickup':'' ?>" class="btn <?= $filter===$s?$tab_colors[$s]:'btn-secondary' ?>">
+    <a href="<?= sanitize_output($documents_url) ?>?status=<?= $s ?>&dview=<?= $doc_view ?>&drawer=<?= urlencode($drawer_search) ?>&pickup=<?= urlencode($pickup_mode) ?>&pickup_date=<?= urlencode($pickup_date) ?>&sort=<?= $sort_pickup?'pickup':'' ?>" class="btn <?= $filter===$s?$tab_colors[$s]:'btn-secondary' ?>">
       <?= sanitize_output(documentStatusLabel($s)) ?> <span class="badge badge-secondary" style="margin-left:4px;"><?= $c ?></span>
     </a>
     <?php endforeach; ?>
   </div>
   <!-- View Toggle -->
   <div class="d-flex gap-2">
-    <a href="?status=<?= urlencode($filter) ?>&dview=list&drawer=<?= urlencode($drawer_search) ?>&pickup=<?= urlencode($pickup_mode) ?>&pickup_date=<?= urlencode($pickup_date) ?>&sort=<?= $sort_pickup?'pickup':'' ?>" class="btn btn-sm <?= $doc_view==='list'?'btn-primary':'btn-secondary' ?>">
+    <a href="<?= sanitize_output($documents_url) ?>?status=<?= urlencode($filter) ?>&dview=list&drawer=<?= urlencode($drawer_search) ?>&pickup=<?= urlencode($pickup_mode) ?>&pickup_date=<?= urlencode($pickup_date) ?>&sort=<?= $sort_pickup?'pickup':'' ?>" class="btn btn-sm <?= $doc_view==='list'?'btn-primary':'btn-secondary' ?>">
       <i class="fas fa-list"></i> List View
     </a>
-    <a href="?status=<?= urlencode($filter) ?>&dview=purok&drawer=<?= urlencode($drawer_search) ?>&pickup=<?= urlencode($pickup_mode) ?>&pickup_date=<?= urlencode($pickup_date) ?>&sort=<?= $sort_pickup?'pickup':'' ?>" class="btn btn-sm <?= $doc_view==='purok'?'btn-primary':'btn-secondary' ?>">
+    <a href="<?= sanitize_output($documents_url) ?>?status=<?= urlencode($filter) ?>&dview=purok&drawer=<?= urlencode($drawer_search) ?>&pickup=<?= urlencode($pickup_mode) ?>&pickup_date=<?= urlencode($pickup_date) ?>&sort=<?= $sort_pickup?'pickup':'' ?>" class="btn btn-sm <?= $doc_view==='purok'?'btn-primary':'btn-secondary' ?>">
       <i class="fas fa-folder"></i> By Purok
     </a>
   </div>
 </div>
 
-<form method="GET" class="d-flex gap-2 align-center mb-3 flex-wrap">
+<form method="GET" action="<?= sanitize_output($documents_url) ?>" class="d-flex gap-2 align-center mb-3 flex-wrap">
   <input type="hidden" name="status" value="<?= sanitize_output($filter) ?>">
   <input type="hidden" name="dview" value="<?= sanitize_output($doc_view) ?>">
   <input type="hidden" name="drawer" value="<?= sanitize_output($drawer_search) ?>">
@@ -258,18 +259,18 @@ require_once '../includes/header.php';
   </label>
   <label class="d-flex align-center gap-2">Exact Date <input type="date" name="pickup_date" class="form-control" value="<?= sanitize_output($pickup_date) ?>"></label>
   <button type="submit" class="btn btn-secondary"><i class="fas fa-filter"></i> Filter Pickup</button>
-  <a href="?status=<?= urlencode($filter) ?>&dview=<?= urlencode($doc_view) ?>&sort=pickup&pickup=<?= urlencode($pickup_mode) ?>&pickup_date=<?= urlencode($pickup_date) ?>" class="btn btn-secondary"><i class="fas fa-arrow-down-wide-short"></i> Sort by Pickup Date</a>
-  <?php if ($pickup_mode !== 'all' || $pickup_date || $sort_pickup): ?><a href="?status=<?= urlencode($filter) ?>&dview=<?= urlencode($doc_view) ?>&drawer=<?= urlencode($drawer_search) ?>" class="btn btn-secondary">Clear Schedule Filter</a><?php endif; ?>
+  <a href="<?= sanitize_output($documents_url) ?>?status=<?= urlencode($filter) ?>&dview=<?= urlencode($doc_view) ?>&sort=pickup&pickup=<?= urlencode($pickup_mode) ?>&pickup_date=<?= urlencode($pickup_date) ?>" class="btn btn-secondary"><i class="fas fa-arrow-down-wide-short"></i> Sort by Pickup Date</a>
+  <?php if ($pickup_mode !== 'all' || $pickup_date || $sort_pickup): ?><a href="<?= sanitize_output($documents_url) ?>?status=<?= urlencode($filter) ?>&dview=<?= urlencode($doc_view) ?>&drawer=<?= urlencode($drawer_search) ?>" class="btn btn-secondary">Clear Schedule Filter</a><?php endif; ?>
 </form>
 
-<form method="GET" class="d-flex gap-2 align-center mb-3">
+<form method="GET" action="<?= sanitize_output($documents_url) ?>" class="d-flex gap-2 align-center mb-3">
   <input type="hidden" name="status" value="<?= sanitize_output($filter) ?>">
   <input type="hidden" name="dview" value="<?= sanitize_output($doc_view) ?>">
   <input type="text" name="drawer" class="form-control" value="<?= sanitize_output($drawer_search) ?>"
          maxlength="100" placeholder="Filter by drawer location..." aria-label="Filter documents by drawer location">
   <button type="submit" class="btn btn-secondary"><i class="fas fa-filter"></i> Filter</button>
   <?php if ($drawer_search): ?>
-  <a href="?status=<?= urlencode($filter) ?>&dview=<?= urlencode($doc_view) ?>" class="btn btn-secondary">Clear</a>
+  <a href="<?= sanitize_output($documents_url) ?>?status=<?= urlencode($filter) ?>&dview=<?= urlencode($doc_view) ?>" class="btn btn-secondary">Clear</a>
   <?php endif; ?>
 </form>
 
@@ -462,7 +463,7 @@ require_once '../includes/header.php';
     <?php if($total_pages>1): ?>
     <div class="pagination" style="padding:16px 22px;">
       <?php for($p=1;$p<=$total_pages;$p++): ?>
-        <a href="?status=<?= urlencode($filter) ?>&dview=list&page=<?= $p ?>&drawer=<?= urlencode($drawer_search) ?>&pickup=<?= urlencode($pickup_mode) ?>&pickup_date=<?= urlencode($pickup_date) ?>&sort=<?= $sort_pickup?'pickup':'' ?>" class="page-btn <?= $p==$page?'active':'' ?>"><?= $p ?></a>
+        <a href="<?= sanitize_output($documents_url) ?>?status=<?= urlencode($filter) ?>&dview=list&page=<?= $p ?>&drawer=<?= urlencode($drawer_search) ?>&pickup=<?= urlencode($pickup_mode) ?>&pickup_date=<?= urlencode($pickup_date) ?>&sort=<?= $sort_pickup?'pickup':'' ?>" class="page-btn <?= $p==$page?'active':'' ?>"><?= $p ?></a>
       <?php endfor; ?>
     </div>
     <?php endif; ?>
