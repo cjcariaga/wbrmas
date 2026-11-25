@@ -1,10 +1,19 @@
 <?php
 // Database Configuration
- define('DB_HOST', 'localhost');
- define('DB_USER', 'u988863428_wbrmas_user');
- define('DB_PASS', 'Wbrmas_pass1');
- define('DB_NAME', 'u988863428_wbrmas_db');
+// Uses the local XAMPP database when opened via localhost, otherwise Hostinger.
+$isLocal = in_array(strtolower(explode(':', $_SERVER['HTTP_HOST'] ?? 'localhost')[0]), ['localhost', '127.0.0.1', '::1', '[::1]'], true);
 
+if ($isLocal) {
+    define('DB_HOST', 'localhost');
+    define('DB_USER', 'root');
+    define('DB_PASS', '');
+    define('DB_NAME', 'wbrmas');
+} else {
+    define('DB_HOST', 'localhost');
+    define('DB_USER', 'u988863428_wbrmas_uname');
+    define('DB_PASS', '@Wbrmas_123');
+    define('DB_NAME', 'u988863428_wbrmas_db');
+}
 
 
 // Security Keys
