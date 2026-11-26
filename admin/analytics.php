@@ -7,6 +7,7 @@ require_permission('view_analytics');
 require_once '../includes/resident_age.php';
 
 $conn = getDBConnection();
+$analytics_url = app_url('admin/analytics.php');
 $today = date('Y-m-d');
 $default_from = (new DateTimeImmutable('first day of -5 months'))->format('Y-m-d');
 $filter_from = trim((string)($_GET['from'] ?? $default_from));
@@ -248,7 +249,7 @@ require_once '../includes/header.php';
   </button>
 </div>
 
-<form method="GET" class="card mb-3 no-print">
+<form method="GET" action="<?= sanitize_output($analytics_url) ?>" class="card mb-3 no-print">
   <div class="card-body d-flex gap-2 align-center flex-wrap" style="padding:14px 18px;">
     <label class="d-flex align-center gap-2">From <input type="date" name="from" class="form-control" required value="<?= sanitize_output($filter_from) ?>"></label>
     <label class="d-flex align-center gap-2">To <input type="date" name="to" class="form-control" required value="<?= sanitize_output($filter_to) ?>"></label>
@@ -262,8 +263,8 @@ require_once '../includes/header.php';
       <select name="action" class="form-control"><option value="all">All actions</option><?php foreach ($analytics_actions as $analytics_action): ?><option value="<?= sanitize_output($analytics_action) ?>" <?= $filter_action === $analytics_action ? 'selected' : '' ?>><?= sanitize_output($analytics_action) ?></option><?php endforeach; ?></select>
     </label>
     <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Apply Filters</button>
-    <a href="?from=<?= date('Y-m-01') ?>&to=<?= date('Y-m-d') ?>" class="btn btn-secondary">This Month</a>
-    <a href="?from=<?= date('Y-01-01') ?>&to=<?= date('Y-m-d') ?>" class="btn btn-secondary">Year to Date</a>
+    <a href="<?= sanitize_output($analytics_url) ?>?from=<?= date('Y-m-01') ?>&to=<?= date('Y-m-d') ?>" class="btn btn-secondary">This Month</a>
+    <a href="<?= sanitize_output($analytics_url) ?>?from=<?= date('Y-01-01') ?>&to=<?= date('Y-m-d') ?>" class="btn btn-secondary">Year to Date</a>
   </div>
 </form>
 

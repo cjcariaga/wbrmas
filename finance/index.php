@@ -11,6 +11,7 @@ require_permission('view_financial_reports');
 
 $conn = getDBConnection();
 $csrf = generate_csrf_token();
+$finance_url = app_url('finance/index.php');
 $can_manage = can('manage_financial_reports');
 $month_start = date('Y-m-01');
 $month_end = date('Y-m-t');
@@ -71,16 +72,16 @@ require_once '../includes/header.php';
   </div>
 </div>
 
-<form method="GET" class="card mb-3 no-print">
+<form method="GET" action="<?= sanitize_output($finance_url) ?>" class="card mb-3 no-print">
   <div class="card-body d-flex gap-2 align-center flex-wrap" style="padding:14px 18px;">
     <label class="d-flex align-center gap-2">From <input type="date" name="from" class="form-control" required value="<?= sanitize_output($date_from) ?>"></label>
     <label class="d-flex align-center gap-2">To <input type="date" name="to" class="form-control" required value="<?= sanitize_output($date_to) ?>"></label>
     <button type="submit" class="btn btn-secondary"><i class="fas fa-filter"></i> Apply Range</button>
-    <a href="?from=<?= date('Y-m-01') ?>&to=<?= date('Y-m-t') ?>" class="btn btn-secondary">This Month</a>
-    <a href="?from=<?= date('Y-01-01') ?>&to=<?= date('Y-03-31') ?>" class="btn btn-secondary">Q1</a>
-    <a href="?from=<?= date('Y-04-01') ?>&to=<?= date('Y-06-30') ?>" class="btn btn-secondary">Q2</a>
-    <a href="?from=<?= date('Y-07-01') ?>&to=<?= date('Y-09-30') ?>" class="btn btn-secondary">Q3</a>
-    <a href="?from=<?= date('Y-10-01') ?>&to=<?= date('Y-12-31') ?>" class="btn btn-secondary">Q4</a>
+    <a href="<?= sanitize_output($finance_url) ?>?from=<?= date('Y-m-01') ?>&to=<?= date('Y-m-t') ?>" class="btn btn-secondary">This Month</a>
+    <a href="<?= sanitize_output($finance_url) ?>?from=<?= date('Y-01-01') ?>&to=<?= date('Y-03-31') ?>" class="btn btn-secondary">Q1</a>
+    <a href="<?= sanitize_output($finance_url) ?>?from=<?= date('Y-04-01') ?>&to=<?= date('Y-06-30') ?>" class="btn btn-secondary">Q2</a>
+    <a href="<?= sanitize_output($finance_url) ?>?from=<?= date('Y-07-01') ?>&to=<?= date('Y-09-30') ?>" class="btn btn-secondary">Q3</a>
+    <a href="<?= sanitize_output($finance_url) ?>?from=<?= date('Y-10-01') ?>&to=<?= date('Y-12-31') ?>" class="btn btn-secondary">Q4</a>
   </div>
 </form>
 

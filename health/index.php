@@ -12,6 +12,7 @@ require_permission('view_health_records');
 
 $conn = getDBConnection();
 $csrf = generate_csrf_token();
+$health_url = app_url('health/index.php');
 $can_manage = can('manage_health_records');
 $search = trim(strip_tags((string)($_GET['q'] ?? '')));
 $resident_filter = max(0, (int)($_GET['resident_id'] ?? 0));
@@ -67,7 +68,7 @@ require_once '../includes/header.php';
   </div>
 </div>
 
-<form method="GET" class="d-flex gap-2 align-center mb-3 flex-wrap">
+<form method="GET" action="<?= sanitize_output($health_url) ?>" class="d-flex gap-2 align-center mb-3 flex-wrap">
   <?php if ($resident_filter): ?><input type="hidden" name="resident_id" value="<?= $resident_filter ?>"><?php endif; ?>
   <div class="search-box" style="flex:1;min-width:240px;max-width:600px;">
     <i class="fas fa-search"></i>
@@ -112,7 +113,7 @@ require_once '../includes/header.php';
     <?php if ($total_pages > 1): ?>
     <div class="pagination" style="padding:16px 22px;">
       <?php for ($p = 1; $p <= $total_pages; $p++): ?>
-      <a class="page-btn <?= $p === $page ? 'active' : '' ?>" href="?<?= http_build_query(array_filter(['resident_id'=>$resident_filter ?: null,'q'=>$search ?: null,'page'=>$p])) ?>"><?= $p ?></a>
+      <a class="page-btn <?= $p === $page ? 'active' : '' ?>" href="<?= sanitize_output($health_url) ?>?<?= http_build_query(array_filter(['resident_id'=>$resident_filter ?: null,'q'=>$search ?: null,'page'=>$p])) ?>"><?= $p ?></a>
       <?php endfor; ?>
     </div>
     <?php endif; ?>

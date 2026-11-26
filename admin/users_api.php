@@ -49,6 +49,11 @@ if ($action === 'add') {
 
     $hash = password_hash($password, PASSWORD_BCRYPT, ['cost'=>10]);
     $stmt = $conn->prepare("INSERT INTO tbl_users (username,password_hash,full_name,first_name,middle_name,last_name,role_id,is_active) VALUES (?,?,?,?,?,?,?,1)");
+    if (!$stmt) {
+        http_response_code(500);
+        echo json_encode(['success'=>false,'message'=>'Could not prepare user creation. Apply the latest database migration and try again.']);
+        exit;
+    }
     $stmt->bind_param("ssssssi",$username,$hash,$full_name,$first_name,$middle_name,$last_name,$role_id);
     if ($stmt->execute()) {
         $new_uid = $conn->insert_id;
@@ -80,15 +85,67 @@ if ($action === 'add') {
                 'view_drawer_index',
                 'manage_drawer_index',
                 'view_health_records',
-                'manage_health_records'
+                'manage_health_records',
+                'view_visitor_logbook'
             ];
         }
 
         if (!empty($default_perms)) {
+            $permission_labels = [
+                'view_dashboard' => ['View Dashboard', 'General'],
+                'view_stats' => ['View Statistics', 'General'],
+                'view_residents' => ['View Residents', 'Residents'],
+                'view_resident_sensitive' => ['View Sensitive Resident Data', 'Residents'],
+                'view_documents' => ['View Documents', 'Documents'],
+                'create_document' => ['Create Document Requests', 'Documents'],
+                'approve_document' => ['Approve Document Requests', 'Documents'],
+                'print_document' => ['Print Documents', 'Documents'],
+                'view_blotter' => ['View Blotter', 'Blotter'],
+                'add_blotter' => ['Add Blotter Records', 'Blotter'],
+                'update_blotter' => ['Update Blotter Records', 'Blotter'],
+                'view_blotter_details' => ['View Blotter Details', 'Blotter'],
+                'view_drawer_index' => ['View Drawer Index', 'Records'],
+                'manage_drawer_index' => ['Manage Drawer Index', 'Records'],
+                'view_health_records' => ['View Health Records', 'Health'],
+                'manage_health_records' => ['Manage Health Records', 'Health'],
+                'view_visitor_logbook' => ['View Visitor Logbook', 'Administration'],
+                'view_financial_reports' => ['View Financial Reports', 'Finance'],
+                'manage_financial_reports' => ['Manage Financial Reports', 'Finance']
+            ];
+            $catalog = $conn->prepare(
+                "INSERT IGNORE INTO tbl_permissions (perm_key, perm_label, perm_group, description)
+                 VALUES (?, ?, ?, ?)"
+            );
+            if (!$catalog) {
+                http_response_code(500);
+                echo json_encode(['success'=>false,'message'=>'Could not prepare default permissions.']);
+                exit;
+            }
+            foreach ($default_perms as $pk) {
+                [$label, $group] = $permission_labels[$pk] ?? [ucwords(str_replace('_', ' ', $pk)), 'General'];
+                $description = $label . ' access for authorized users.';
+                $catalog->bind_param("ssss", $pk, $label, $group, $description);
+                if (!$catalog->execute()) {
+                    http_response_code(500);
+                    echo json_encode(['success'=>false,'message'=>'Could not register default permissions.']);
+                    exit;
+                }
+            }
+            $catalog->close();
+
             $ps = $conn->prepare("INSERT IGNORE INTO tbl_user_permissions (user_id, perm_key, granted) VALUES (?,?,1)");
+            if (!$ps) {
+                http_response_code(500);
+                echo json_encode(['success'=>false,'message'=>'Could not assign default user permissions.']);
+                exit;
+            }
             foreach ($default_perms as $pk) {
                 $ps->bind_param("is", $new_uid, $pk);
-                $ps->execute();
+                if (!$ps->execute()) {
+                    http_response_code(500);
+                    echo json_encode(['success'=>false,'message'=>'Could not assign default user permissions.']);
+                    exit;
+                }
             }
             $ps->close();
         }
@@ -147,7 +204,8 @@ elseif ($action === 'update') {
                     'view_dashboard','view_stats','view_residents','view_resident_sensitive',
                     'view_documents','create_document','approve_document','print_document',
                     'view_blotter','add_blotter','update_blotter','view_blotter_details',
-                    'view_drawer_index','manage_drawer_index','view_health_records','manage_health_records'
+                    'view_drawer_index','manage_drawer_index','view_health_records','manage_health_records',
+                    'view_visitor_logbook'
                 ];
             } else {
                 $role_defaults = [];

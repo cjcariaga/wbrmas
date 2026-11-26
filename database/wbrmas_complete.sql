@@ -8,7 +8,8 @@
 --   add_drawer_and_nonresident_complainant.sql, add_purok.sql,
 --   add_resident_lifecycle_fields.sql, create_drawer_index.sql,
 --   create_financial_reports.sql, create_health_records.sql,
---   create_resident_portal.sql, create_resident_record_locks.sql
+--   create_resident_portal.sql, create_resident_record_locks.sql,
+--   create_visitor_logbook.sql, add_user_name_fields.sql
 --
 -- HOW TO USE: create an empty database (e.g. wbrmas_db), select it in
 -- phpMyAdmin, then import this file once. It is meant for a fresh, empty
@@ -34,6 +35,9 @@ CREATE TABLE IF NOT EXISTS tbl_users (
     username VARCHAR(50) NOT NULL UNIQUE,
     password_hash VARBINARY(255) NOT NULL,
     full_name VARCHAR(150) NOT NULL,
+    first_name VARCHAR(80) NOT NULL DEFAULT '',
+    middle_name VARCHAR(80) NOT NULL DEFAULT '',
+    last_name VARCHAR(80) NOT NULL DEFAULT '',
     role_id INT NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     failed_attempts INT DEFAULT 0,
@@ -217,6 +221,20 @@ CREATE TABLE IF NOT EXISTS tbl_user_permissions (
     FOREIGN KEY (user_id) REFERENCES tbl_users(user_id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS tbl_visitor_logbook (
+    visitor_id INT AUTO_INCREMENT PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    contact_number TEXT NULL,
+    address TEXT NULL,
+    purpose VARCHAR(50) NOT NULL,
+    person_to_visit VARCHAR(150) NULL,
+    time_in DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    time_out DATETIME NULL,
+    ip_address VARCHAR(45) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_visitor_time_in_id (time_in, visitor_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- ─── Physical Drawer Index ──────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS tbl_storage_drawers (
@@ -337,12 +355,25 @@ INSERT INTO tbl_document_types (type_name, description, requirements, fee) VALUE
 ('Certificate of Indigency', 'Certifies the resident belongs to an indigent family in the barangay.', 'Valid ID, Proof of Residency', 0.00);
 
 INSERT IGNORE INTO tbl_permissions (perm_key, perm_label, perm_group, description) VALUES
+('view_dashboard', 'View Dashboard', 'General', 'View the staff dashboard.'),
+('view_stats', 'View Statistics', 'General', 'View dashboard statistics.'),
+('view_residents', 'View Residents', 'Residents', 'View resident records.'),
+('view_resident_sensitive', 'View Sensitive Resident Data', 'Residents', 'View sensitive resident information.'),
+('view_documents', 'View Documents', 'Documents', 'View document requests.'),
+('create_document', 'Create Document Requests', 'Documents', 'Create document requests.'),
+('approve_document', 'Approve Document Requests', 'Documents', 'Approve document requests.'),
+('print_document', 'Print Documents', 'Documents', 'Print approved documents.'),
+('view_blotter', 'View Blotter', 'Blotter', 'View blotter records.'),
+('add_blotter', 'Add Blotter Records', 'Blotter', 'Add blotter records.'),
+('update_blotter', 'Update Blotter Records', 'Blotter', 'Update blotter records.'),
+('view_blotter_details', 'View Blotter Details', 'Blotter', 'View sensitive blotter details.'),
 ('view_drawer_index', 'View Drawer Index', 'Records', 'View physical drawer folders and filing index entries.'),
 ('manage_drawer_index', 'Manage Drawer Index', 'Records', 'Create and edit physical drawer folders and filing index entries.'),
 ('view_health_records', 'View Health Records', 'Health', 'View resident-linked encrypted health records and descriptive analytics.'),
 ('manage_health_records', 'Manage Health Records', 'Health', 'Add and edit resident-linked health records.'),
 ('view_financial_reports', 'View Financial Reports', 'Finance', 'View financial entries, period summaries, and reports.'),
-('manage_financial_reports', 'Manage Financial Reports', 'Finance', 'Create and edit income and expense entries.');
+('manage_financial_reports', 'Manage Financial Reports', 'Finance', 'Create and edit income and expense entries.'),
+('view_visitor_logbook', 'View Visitor Logbook', 'Administration', 'View visitor logbook entries and record visitor time out.');
 
 INSERT IGNORE INTO tbl_storage_drawers (drawer_name) VALUES
 ('Drawer 1'),

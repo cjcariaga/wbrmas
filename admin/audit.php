@@ -7,6 +7,7 @@ require_role('System Administrator');
 
 $conn = getDBConnection();
 $csrf = generate_csrf_token();
+$audit_url = app_url('admin/audit.php');
 
 $per_page = 20;
 $page     = max(1,(int)($_GET['page'] ?? 1));
@@ -97,7 +98,7 @@ require_once '../includes/header.php';
 <!-- Filters -->
 <div class="card mb-3">
   <div class="card-body" style="padding:16px 22px;">
-    <form method="GET" class="d-flex gap-2 flex-wrap align-center">
+    <form method="GET" action="<?= sanitize_output($audit_url) ?>" class="d-flex gap-2 flex-wrap align-center">
       <div class="search-box" style="flex:1;min-width:180px;">
         <i class="fas fa-search"></i>
         <input type="text" name="q" placeholder="Search logs..." value="<?= sanitize_output($search) ?>">
@@ -195,12 +196,12 @@ require_once '../includes/header.php';
     <?php if ($total_pages > 1): ?>
     <div class="pagination" style="padding:16px 22px;">
       <?php for ($p = 1; $p <= min($total_pages,10); $p++): ?>
-        <a href="?page=<?= $p ?>&q=<?= urlencode($search) ?>&action_type=<?= urlencode($filter_action) ?>&user_id=<?= urlencode($filter_user) ?>&date=<?= urlencode($filter_date) ?>&date_from=<?= urlencode($filter_from) ?>&date_to=<?= urlencode($filter_to) ?>"
+        <a href="<?= sanitize_output($audit_url) ?>?page=<?= $p ?>&q=<?= urlencode($search) ?>&action_type=<?= urlencode($filter_action) ?>&user_id=<?= urlencode($filter_user) ?>&date=<?= urlencode($filter_date) ?>&date_from=<?= urlencode($filter_from) ?>&date_to=<?= urlencode($filter_to) ?>"
            class="page-btn <?= $p==$page?'active':'' ?>"><?= $p ?></a>
       <?php endfor; ?>
       <?php if ($total_pages > 10): ?>
         <span class="page-btn">...</span>
-        <a href="?page=<?= $total_pages ?>" class="page-btn"><?= $total_pages ?></a>
+        <a href="<?= sanitize_output($audit_url) ?>?page=<?= $total_pages ?>" class="page-btn"><?= $total_pages ?></a>
       <?php endif; ?>
     </div>
     <?php endif; ?>

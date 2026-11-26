@@ -176,6 +176,34 @@ if (isset($_GET['clear_pending'])) {
   color:#aaa; margin-top:6px; cursor:pointer; text-decoration:none;
 }
 .back-link:hover { color:#2980b9; }
+.visitor-logbook-section { padding:56px 24px; background:#fff; }
+.visitor-logbook-inner { width:min(1120px,100%); margin:0 auto; display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); gap:48px; align-items:start; }
+.visitor-logbook-copy h2 { margin:12px 0; color:#173954; font:600 2.25rem/1.1 Georgia,'Times New Roman',serif; }
+.visitor-logbook-copy p { color:#5f7082; font-size:.9rem; line-height:1.7; }
+.visitor-privacy-notice { margin-top:18px; padding:13px 15px; border-left:3px solid #2c86bb; border-radius:4px; background:#eef6fb; color:#315e7e; font-size:.8rem; line-height:1.6; }
+.visitor-logbook-card { padding:24px; border:1px solid #d8e2ea; border-radius:8px; background:#fff; box-shadow:0 12px 32px rgba(20,48,72,.1); }
+.visitor-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 16px; }
+.visitor-form-field { min-width:0; margin-bottom:15px; }
+.visitor-form-field.full-width { grid-column:1/-1; }
+.visitor-form-field label { display:block; margin-bottom:6px; color:#34443e; font-size:.8rem; font-weight:700; }
+.visitor-form-field input,.visitor-form-field select { width:100%; min-height:43px; padding:10px 12px; border:1px solid #d5ddd7; border-radius:6px; background:#fbfcfa; color:#263746; font:400 .87rem 'DM Sans',sans-serif; }
+.visitor-form-field input:focus,.visitor-form-field select:focus { outline:0; border-color:#3c8db8; background:#fff; box-shadow:0 0 0 3px rgba(44,134,187,.15); }
+.visitor-form-submit { min-height:45px; padding:11px 18px; border:1px solid #1b4f78; border-radius:6px; background:linear-gradient(110deg,#1b4f78,#2c86bb); color:#fff; font:700 .88rem 'DM Sans',sans-serif; cursor:pointer; }
+.visitor-form-submit:disabled { opacity:.7; cursor:wait; }
+.visitor-form-message { margin-bottom:15px; padding:11px 13px; border-radius:6px; font-size:.84rem; line-height:1.5; }
+.visitor-form-message.success { border:1px solid #a9dfbf; background:#eafaf1; color:#1e8449; }
+.visitor-form-message.error { border:1px solid #efc7bd; background:#fff1ee; color:#923c2f; }
+.visitor-honeypot { position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden; }
+@media(max-width:760px) {
+  .visitor-logbook-section { padding:45px 20px; }
+  .visitor-logbook-inner { grid-template-columns:1fr; gap:24px; }
+  .visitor-logbook-copy h2 { font-size:2rem; }
+}
+@media(max-width:480px) {
+  .visitor-form-grid { grid-template-columns:1fr; }
+  .visitor-form-field.full-width { grid-column:auto; }
+  .visitor-logbook-card { padding:20px 16px; }
+}
 </style>
 </head>
 <body>
@@ -183,7 +211,7 @@ if (isset($_GET['clear_pending'])) {
   <header class="staff-nav">
     <a class="staff-brand" href="#staffHome"><img src="assets/img/brgy_seal.png" alt=""><span><strong>Barangay San Isidro</strong><small>Staff Management Portal</small></span></a>
     <nav class="staff-nav-links" aria-label="Main navigation">
-      <a href="#staffHome">Home</a><a href="#staffAbout">About</a><a href="#staffServices">Services</a>
+      <a href="#staffHome">Home</a><a href="#staffAbout">About</a><a href="#staffServices">Services</a><a href="#visitor-logbook">Visitor Logbook</a>
       <a class="staff-nav-login" href="#staff-login"><i class="fas fa-right-to-bracket" aria-hidden="true"></i> Staff Login</a>
     </nav>
   </header>
@@ -197,13 +225,61 @@ if (isset($_GET['clear_pending'])) {
           <h1 id="staffHeroTitle">Barangay<br>San Isidro</h1>
           <p class="staff-hero-location">City of Ilagan, Isabela · Staff and Administration</p>
           <p class="staff-hero-description">A secure workspace for barangay personnel to manage records and deliver responsive public service.</p>
-          <div class="staff-hero-actions"><a class="staff-action-primary" href="#staff-login">Staff sign in <i class="fas fa-arrow-right" aria-hidden="true"></i></a><a class="staff-action-secondary" href="portal/login.php">Resident portal</a></div>
+          <div class="staff-hero-actions"><a class="staff-action-primary" href="#staff-login">Staff sign in <i class="fas fa-arrow-right" aria-hidden="true"></i></a><a class="staff-action-secondary" href="#visitor-logbook"><i class="fas fa-clipboard-list" aria-hidden="true"></i> Visitor sign-in</a><a class="staff-action-secondary" href="portal/login.php">Resident portal</a></div>
         </div>
         <div class="staff-hero-facts" id="staffServices">
           <div class="staff-hero-fact"><div class="staff-fact-label"><i class="far fa-building" aria-hidden="true"></i> Barangay</div><div class="staff-fact-value">San Isidro</div></div>
           <div class="staff-hero-fact"><div class="staff-fact-label"><i class="fas fa-location-dot" aria-hidden="true"></i> Location</div><div class="staff-fact-value">City of Ilagan, Isabela</div></div>
           <div class="staff-hero-fact"><div class="staff-fact-label"><i class="fas fa-shield-halved" aria-hidden="true"></i> Staff access</div><div class="staff-fact-value">WBRMAS · Authorized personnel</div></div>
         </div>
+      </div>
+    </section>
+
+    <section class="visitor-logbook-section" id="visitor-logbook" aria-labelledby="visitorLogbookTitle">
+      <div class="visitor-logbook-inner">
+        <div class="visitor-logbook-copy">
+          <div class="staff-section-kicker">Barangay Hall</div>
+          <h2 id="visitorLogbookTitle">Visitor Logbook</h2>
+          <p>Mag-log in ng inyong pagbisita sa Barangay San Isidro. Awtomatikong itatala ang oras ng pagpasok; staff ang magtatala ng oras ng paglabas.</p>
+          <div class="visitor-privacy-notice"><i class="fas fa-shield-halved" aria-hidden="true"></i> Ang inyong impormasyon ay gagamitin lamang para sa record ng barangay.</div>
+        </div>
+        <form class="visitor-logbook-card" id="visitorLogbookForm" method="POST" action="<?= htmlspecialchars(app_url('visitor_api.php'), ENT_QUOTES, 'UTF-8') ?>">
+          <input type="hidden" name="csrf_token" value="<?= sanitize_output($csrf) ?>">
+          <div class="visitor-honeypot" aria-hidden="true">
+            <label>Leave this field empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+          </div>
+          <div id="visitorFormMessage" class="visitor-form-message" role="status" aria-live="polite" hidden></div>
+          <div class="visitor-form-grid">
+            <div class="visitor-form-field full-width">
+              <label for="visitorFullName">Full Name <span aria-hidden="true">*</span></label>
+              <input type="text" id="visitorFullName" name="full_name" maxlength="150" autocomplete="name" required>
+            </div>
+            <div class="visitor-form-field">
+              <label for="visitorContactNumber">Contact Number <small>(optional)</small></label>
+              <input type="tel" id="visitorContactNumber" name="contact_number" maxlength="50" autocomplete="tel">
+            </div>
+            <div class="visitor-form-field">
+              <label for="visitorAddress">Address / Purok <small>(optional)</small></label>
+              <input type="text" id="visitorAddress" name="address" maxlength="300" autocomplete="street-address">
+            </div>
+            <div class="visitor-form-field">
+              <label for="visitorPurpose">Purpose of Visit <span aria-hidden="true">*</span></label>
+              <select id="visitorPurpose" name="purpose" required>
+                <option value="">Pumili ng purpose</option>
+                <option value="Document Request">Document Request</option>
+                <option value="Complaint/Blotter">Complaint/Blotter</option>
+                <option value="Inquiry">Inquiry</option>
+                <option value="Meeting">Meeting</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="visitor-form-field">
+              <label for="visitorPersonToVisit">Person / Office to Visit <small>(optional)</small></label>
+              <input type="text" id="visitorPersonToVisit" name="person_to_visit" maxlength="150">
+            </div>
+          </div>
+          <button type="submit" class="visitor-form-submit"><i class="fas fa-clipboard-check" aria-hidden="true"></i> Submit Visitor Log</button>
+        </form>
       </div>
     </section>
 
@@ -307,6 +383,34 @@ if (isset($_GET['clear_pending'])) {
   </div>
 
 <script>
+const visitorLogbookForm = document.getElementById('visitorLogbookForm');
+visitorLogbookForm?.addEventListener('submit', async function(event) {
+  event.preventDefault();
+  const message = document.getElementById('visitorFormMessage');
+  const button = visitorLogbookForm.querySelector('button[type="submit"]');
+  button.disabled = true;
+  button.innerHTML = '<i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i> Isinusumite…';
+  try {
+    const response = await fetch(<?= json_encode(app_url('visitor_api.php')) ?>, {
+      method: 'POST',
+      body: new FormData(visitorLogbookForm),
+      credentials: 'same-origin',
+      headers: {'Accept': 'application/json'}
+    });
+    const result = await response.json();
+    message.textContent = result.message || (result.success ? 'Salamat! Naitala na ang inyong pagbisita.' : 'Hindi naisumite ang inyong pagbisita.');
+    message.className = `visitor-form-message ${result.success ? 'success' : 'error'}`;
+    message.hidden = false;
+    if (result.success) visitorLogbookForm.reset();
+  } catch (error) {
+    message.textContent = 'Hindi makakonekta sa server. Pakisubukan muli.';
+    message.className = 'visitor-form-message error';
+    message.hidden = false;
+  } finally {
+    button.disabled = false;
+    button.innerHTML = '<i class="fas fa-clipboard-check" aria-hidden="true"></i> Submit Visitor Log';
+  }
+});
 
 /* ── Login method selection ──────────────────────────────────────── */
 function showLoginMethod(method) {

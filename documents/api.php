@@ -68,9 +68,11 @@ if ($action === 'release_document') {
         http_response_code(400);
         echo json_encode(['success'=>false,'message'=>'Release time cannot be earlier than when the document was stored.']); exit;
     }
-    if (!empty($request['preferred_pickup_date']) && date('Y-m-d', $release_timestamp) < $request['preferred_pickup_date']) {
-        http_response_code(409);
-        echo json_encode(['success'=>false,'message'=>'This document cannot be released before its scheduled pickup date.']); exit;
+    $early_pickup = !empty($request['preferred_pickup_date'])
+        && date('Y-m-d', $release_timestamp) < $request['preferred_pickup_date'];
+    if ($early_pickup && (int)($_POST['early_pickup_acknowledged'] ?? 0) !== 1) {
+        http_response_code(400);
+        echo json_encode(['success'=>false,'message'=>'Confirm the emergency early pickup before releasing this document.']); exit;
     }
     $entry_check = $conn->prepare(
         "SELECT e.entry_id, d.drawer_name FROM tbl_storage_entries e
@@ -125,7 +127,9 @@ if ($action === 'release_document') {
         echo json_encode(['success'=>false,'message'=>'Could not update the Drawer Index history.']); exit;
     }
     $conn->commit();
-    write_audit_log($uid, 'RELEASE_STORED_DOCUMENT', "request:$request_id", "Code:{$request['request_code']} Drawer:{$drawer_entry['drawer_name']} ReceivedBy:$received_by ReleasedAt:$released_at");
+    $audit_details = "Code:{$request['request_code']} Drawer:{$drawer_entry['drawer_name']} ReceivedBy:$received_by ReleasedAt:$released_at";
+    if ($early_pickup) $audit_details .= " EarlyPickup:yes ScheduledFor:{$request['preferred_pickup_date']}";
+    write_audit_log($uid, 'RELEASE_STORED_DOCUMENT', "request:$request_id", $audit_details);
     echo json_encode(['success'=>true,'message'=>'Document released.']); exit;
 }
 

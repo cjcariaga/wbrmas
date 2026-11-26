@@ -11,6 +11,7 @@ require_once '../includes/resident_age.php';
 
 $conn = getDBConnection();
 $csrf = generate_csrf_token();
+$masterlist_url = app_url('admin/masterlist.php');
 
 // ── Filters ───────────────────────────────────────────────────────────────────
 $f_purok  = sanitize_input($_GET['purok']  ?? '');
@@ -125,14 +126,14 @@ require_once '../includes/header.php';
     <button class="btn btn-secondary btn-sm" onclick="window.print()">
       <i class="fas fa-print"></i> Print
     </button>
-    <a href="?<?= http_build_query(array_merge($_GET,['export'=>'csv'])) ?>" class="btn btn-success btn-sm">
+    <a href="<?= sanitize_output($masterlist_url) ?>?<?= http_build_query(array_merge($_GET,['export'=>'csv'])) ?>" class="btn btn-success btn-sm">
       <i class="fas fa-file-csv"></i> Export CSV
     </a>
   </div>
 </div>
 
 <!-- Filters -->
-<form method="GET" class="card mb-3">
+<form method="GET" action="<?= sanitize_output($masterlist_url) ?>" class="card mb-3">
   <div class="card-body" style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;padding:16px 20px;">
     <div class="form-group" style="margin:0;min-width:140px;">
       <label style="font-size:.8rem;font-weight:600;">Purok</label>
@@ -176,7 +177,7 @@ require_once '../includes/header.php';
     <button type="submit" class="btn btn-primary btn-sm">
       <i class="fas fa-filter"></i> Apply Filters
     </button>
-    <a href="?" class="btn btn-secondary btn-sm">
+    <a href="<?= sanitize_output($masterlist_url) ?>" class="btn btn-secondary btn-sm">
       <i class="fas fa-xmark"></i> Clear
     </a>
     <span style="margin-left:auto;font-size:.83rem;color:var(--text-muted);align-self:center;">

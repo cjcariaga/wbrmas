@@ -351,8 +351,8 @@ require_once '../includes/header.php';
                 <?php if($row['status']==='APPROVED' && can('approve_document')): ?>
                 <button class="btn btn-icon btn-sm" title="Generate & Print" style="color:var(--primary);" onclick="generateDoc(<?= (int)$row['request_id'] ?>, <?= htmlspecialchars(json_encode($row['preferred_pickup_date'] ?? ''), ENT_QUOTES, 'UTF-8') ?>)"><i class="fas fa-print"></i></button>
                 <?php endif; ?>
-                <?php if($row['status']==='STORED' && can('approve_document') && (empty($row['preferred_pickup_date']) || $row['preferred_pickup_date'] <= date('Y-m-d'))): ?>
-                <button class="btn btn-icon btn-sm" title="Mark as Picked Up" style="color:var(--success);" onclick="openReleaseModal(<?= (int)$row['request_id'] ?>, <?= htmlspecialchars(json_encode($row['request_code']), ENT_QUOTES, 'UTF-8') ?>)"><i class="fas fa-person-walking-arrow-right"></i></button>
+                <?php if($row['status']==='STORED' && can('approve_document')): ?>
+                <button class="btn btn-icon btn-sm" title="Mark as Picked Up" style="color:var(--success);" onclick="openReleaseModal(<?= (int)$row['request_id'] ?>, <?= htmlspecialchars(json_encode($row['request_code']), ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars(json_encode($row['preferred_pickup_date'] ?? ''), ENT_QUOTES, 'UTF-8') ?>)"><i class="fas fa-person-walking-arrow-right"></i></button>
                 <?php endif; ?>
                 <?php if(in_array($row['status'],['PRINTED','STORED','RELEASED'],true) && can('approve_document')): ?>
                 <button class="btn btn-icon btn-sm" title="Reprint" onclick="reprintDoc(<?= $row['request_id'] ?>)"><i class="fas fa-rotate-right"></i></button>
@@ -437,8 +437,8 @@ require_once '../includes/header.php';
                 <?php if($row['status']==='APPROVED' && can('approve_document')): ?>
                 <button class="btn btn-icon btn-sm" title="Generate & Print" style="color:var(--primary);" onclick="generateDoc(<?= (int)$row['request_id'] ?>, <?= htmlspecialchars(json_encode($row['preferred_pickup_date'] ?? ''), ENT_QUOTES, 'UTF-8') ?>)"><i class="fas fa-print"></i></button>
                 <?php endif; ?>
-                <?php if($row['status']==='STORED' && can('approve_document') && (empty($row['preferred_pickup_date']) || $row['preferred_pickup_date'] <= date('Y-m-d'))): ?>
-                <button class="btn btn-icon btn-sm" title="Mark as Picked Up" style="color:var(--success);" onclick="openReleaseModal(<?= (int)$row['request_id'] ?>, <?= htmlspecialchars(json_encode($row['request_code']), ENT_QUOTES, 'UTF-8') ?>)"><i class="fas fa-person-walking-arrow-right"></i></button>
+                <?php if($row['status']==='STORED' && can('approve_document')): ?>
+                <button class="btn btn-icon btn-sm" title="Mark as Picked Up" style="color:var(--success);" onclick="openReleaseModal(<?= (int)$row['request_id'] ?>, <?= htmlspecialchars(json_encode($row['request_code']), ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars(json_encode($row['preferred_pickup_date'] ?? ''), ENT_QUOTES, 'UTF-8') ?>)"><i class="fas fa-person-walking-arrow-right"></i></button>
                 <?php endif; ?>
                 <?php if(in_array($row['status'],['PRINTED','STORED','RELEASED'],true) && can('approve_document')): ?>
                 <button class="btn btn-icon btn-sm" title="Reprint" onclick="reprintDoc(<?= $row['request_id'] ?>)"><i class="fas fa-rotate-right"></i></button>
@@ -531,6 +531,13 @@ require_once '../includes/header.php';
     <div class="modal-body">
       <input type="hidden" id="releaseRequestId">
       <p id="releaseRequestCode" style="margin:0 0 16px;color:var(--text-muted);"></p>
+      <div id="earlyPickupNotice" hidden style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:12px;margin-bottom:16px;">
+        <p style="margin:0 0 8px;">The scheduled pickup date is <strong id="earlyPickupScheduleDate"></strong>. Confirm only if an emergency requires an early pickup.</p>
+        <label style="display:flex;align-items:flex-start;gap:8px;">
+          <input type="checkbox" id="earlyPickupAcknowledged" style="margin-top:3px;">
+          <span>I confirm this early pickup is approved.</span>
+        </label>
+      </div>
       <div class="form-group">
         <label for="releaseReceivedBy">Received By <span class="req">*</span></label>
         <input type="text" id="releaseReceivedBy" class="form-control" maxlength="150" required placeholder="Resident or authorized representative">
@@ -634,6 +641,7 @@ function showBlotterWarning(id, status, csrf, caseCount, message) {
 
 let pendingPrintRequestId = 0;
 let pendingPrintPickupDate = '';
+let pendingReleaseNeedsEarlyAcknowledgement = false;
 const DOCUMENT_SERVER_DATE = <?= json_encode(date('Y-m-d')) ?>;
 
 function editDocumentDrawer(requestId, drawerLocation) {
@@ -751,10 +759,14 @@ async function confirmGenerateDoc() {
   }
 }
 
-function openReleaseModal(requestId, requestCode) {
+function openReleaseModal(requestId, requestCode, preferredPickupDate = '') {
   document.getElementById('releaseRequestId').value = requestId;
   document.getElementById('releaseRequestCode').textContent = `Request ${requestCode} is stored and awaiting pickup.`;
   document.getElementById('releaseReceivedBy').value = '';
+  pendingReleaseNeedsEarlyAcknowledgement = preferredPickupDate !== '' && preferredPickupDate > DOCUMENT_SERVER_DATE;
+  document.getElementById('earlyPickupNotice').hidden = !pendingReleaseNeedsEarlyAcknowledgement;
+  document.getElementById('earlyPickupScheduleDate').textContent = preferredPickupDate;
+  document.getElementById('earlyPickupAcknowledged').checked = false;
   const now = new Date();
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
   document.getElementById('releaseDateTime').value = now.toISOString().slice(0, 16);
@@ -770,12 +782,17 @@ async function confirmDocumentRelease() {
     showToast('error', 'Enter the receiving person and release date/time.');
     return;
   }
+  if (pendingReleaseNeedsEarlyAcknowledgement && !document.getElementById('earlyPickupAcknowledged').checked) {
+    showToast('error', 'Confirm the emergency early pickup before continuing.');
+    return;
+  }
   button.disabled = true;
   try {
     const result = await apiRequest(`${DOCUMENT_API_URL}?action=release_document`, {
       request_id: requestId,
       received_by: receivedBy,
       released_at: releasedAt,
+      early_pickup_acknowledged: pendingReleaseNeedsEarlyAcknowledgement ? 1 : 0,
       csrf_token: '<?= $csrf ?>'
     });
     if (!result.success) {

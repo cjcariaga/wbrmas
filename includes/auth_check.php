@@ -39,7 +39,8 @@ function user_has_permission($permission) {
     if ($role_name === 'Barangay Treasurer') {
         return false;
     }
-    if (!isset($_SESSION['permissions'])) {
+    static $permissions_loaded = false;
+    if (!$permissions_loaded) {
         $_SESSION['permissions'] = [];
         $conn = getDBConnection();
         $uid = (int)$_SESSION['user_id'];
@@ -51,6 +52,7 @@ function user_has_permission($permission) {
             while ($row = $result->fetch_assoc()) $_SESSION['permissions'][] = $row['perm_key'];
             $stmt->close();
         }
+        $permissions_loaded = true;
     }
     return in_array($permission, $_SESSION['permissions'], true);
 }

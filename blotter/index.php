@@ -7,6 +7,7 @@ require_permission('view_blotter');
 
 $conn   = getDBConnection();
 $csrf   = generate_csrf_token();
+$blotter_url = app_url('blotter/index.php');
 $filter = sanitize_input($_GET['status'] ?? '');
 $code_q = sanitize_input($_GET['q'] ?? '');
 
@@ -70,14 +71,14 @@ require_once '../includes/header.php';
 
 <!-- Status Tabs -->
 <div class="d-flex gap-2 mb-3 flex-wrap">
-  <a href="?" class="btn <?= !$filter?'btn-primary':'btn-secondary' ?>">
+  <a href="<?= sanitize_output($blotter_url) ?>" class="btn <?= !$filter?'btn-primary':'btn-secondary' ?>">
     All <span class="badge badge-secondary" style="margin-left:4px;"><?= $total ?></span>
   </a>
   <?php
   $tab_colors = ['Active'=>'btn-danger','Under Mediation'=>'btn-warning','Resolved'=>'btn-success','Referred'=>'btn-primary'];
   foreach ($counts as $s => $c):
   ?>
-  <a href="?status=<?= urlencode($s) ?>" class="btn <?= $filter===$s?$tab_colors[$s]:'btn-secondary' ?>">
+  <a href="<?= sanitize_output($blotter_url) ?>?status=<?= urlencode($s) ?>" class="btn <?= $filter===$s?$tab_colors[$s]:'btn-secondary' ?>">
     <?= sanitize_output($s) ?>
     <span class="badge badge-secondary" style="margin-left:4px;"><?= $c ?></span>
   </a>
@@ -199,7 +200,7 @@ require_once '../includes/header.php';
     <?php if ($total_pages > 1): ?>
     <div class="pagination" style="padding:16px 22px;">
       <?php for ($p=1; $p<=$total_pages; $p++): ?>
-        <a href="?status=<?= urlencode($filter) ?>&page=<?= $p ?>"
+        <a href="<?= sanitize_output($blotter_url) ?>?status=<?= urlencode($filter) ?>&page=<?= $p ?>"
            class="page-btn <?= $p==$page?'active':'' ?>"><?= $p ?></a>
       <?php endfor; ?>
     </div>

@@ -11,6 +11,7 @@ require_once '../includes/resident_age.php';
 
 $conn    = getDBConnection();
 $csrf    = generate_csrf_token();
+$residents_url = app_url('residents/index.php');
 $search  = sanitize_input($_GET['q']          ?? '');
 $drawer_search = sanitize_input($_GET['drawer'] ?? '');
 $view    = sanitize_input($_GET['view']       ?? 'purok'); // purok | age
@@ -318,14 +319,14 @@ function renderFolder($folder_id, $label, $all_residents, $color, $is_special, $
   <!-- View Type -->
   <div style="display:flex;gap:6px;align-items:center;">
     <span style="font-size:.72rem;color:var(--text-muted);font-weight:600;margin-right:2px;">VIEW:</span>
-    <a href="?view=purok&q=<?= urlencode($search) ?>&pp=<?= $per_page ?>&rs=<?= urlencode($status_filter) ?>&drawer=<?= urlencode($drawer_search) ?>"
+    <a href="<?= sanitize_output($residents_url) ?>?view=purok&q=<?= urlencode($search) ?>&pp=<?= $per_page ?>&rs=<?= urlencode($status_filter) ?>&drawer=<?= urlencode($drawer_search) ?>"
        style="padding:5px 14px;border-radius:6px;font-size:.78rem;font-weight:600;text-decoration:none;
               border:1.5px solid <?= $view==='purok'?'var(--primary)':'var(--border)' ?>;
               background:<?= $view==='purok'?'var(--primary)':'transparent' ?>;
               color:<?= $view==='purok'?'#fff':'var(--text-muted)' ?>;">
       <i class="fas fa-map-marker-alt"></i> By Purok
     </a>
-    <a href="?view=age&q=<?= urlencode($search) ?>&pp=<?= $per_page ?>&rs=<?= urlencode($status_filter) ?>&drawer=<?= urlencode($drawer_search) ?>"
+    <a href="<?= sanitize_output($residents_url) ?>?view=age&q=<?= urlencode($search) ?>&pp=<?= $per_page ?>&rs=<?= urlencode($status_filter) ?>&drawer=<?= urlencode($drawer_search) ?>"
        style="padding:5px 14px;border-radius:6px;font-size:.78rem;font-weight:600;text-decoration:none;
               border:1.5px solid <?= $view==='age'?'var(--primary)':'var(--border)' ?>;
               background:<?= $view==='age'?'var(--primary)':'transparent' ?>;
@@ -339,7 +340,7 @@ function renderFolder($folder_id, $label, $all_residents, $color, $is_special, $
   <!-- Status Filter -->
   <div style="display:flex;gap:6px;align-items:center;">
     <span style="font-size:.72rem;color:var(--text-muted);font-weight:600;margin-right:2px;">STATUS:</span>
-    <a href="?view=<?= $view ?>&q=<?= urlencode($search) ?>&pp=<?= $per_page ?>&drawer=<?= urlencode($drawer_search) ?>"
+    <a href="<?= sanitize_output($residents_url) ?>?view=<?= $view ?>&q=<?= urlencode($search) ?>&pp=<?= $per_page ?>&drawer=<?= urlencode($drawer_search) ?>"
        style="padding:5px 14px;border-radius:6px;font-size:.78rem;font-weight:600;text-decoration:none;
               border:1.5px solid <?= $status_filter===''?'#1a3a5c':'var(--border)' ?>;
               background:<?= $status_filter===''?'#1a3a5c':'transparent' ?>;
@@ -350,7 +351,7 @@ function renderFolder($folder_id, $label, $all_residents, $color, $is_special, $
         <?= number_format($total_rows) ?>
       </span>
     </a>
-    <a href="?view=<?= $view ?>&q=<?= urlencode($search) ?>&pp=<?= $per_page ?>&rs=Active&drawer=<?= urlencode($drawer_search) ?>"
+    <a href="<?= sanitize_output($residents_url) ?>?view=<?= $view ?>&q=<?= urlencode($search) ?>&pp=<?= $per_page ?>&rs=Active&drawer=<?= urlencode($drawer_search) ?>"
        style="padding:5px 14px;border-radius:6px;font-size:.78rem;font-weight:600;text-decoration:none;
               border:1.5px solid <?= $status_filter==='Active'?'#1e8449':'#a9dfbf' ?>;
               background:<?= $status_filter==='Active'?'#1e8449':'transparent' ?>;
@@ -362,7 +363,7 @@ function renderFolder($folder_id, $label, $all_residents, $color, $is_special, $
         <?= number_format($status_counts['Active'] ?? 0) ?>
       </span>
     </a>
-    <a href="?view=<?= $view ?>&q=<?= urlencode($search) ?>&pp=<?= $per_page ?>&rs=Pending+Verification&drawer=<?= urlencode($drawer_search) ?>"
+    <a href="<?= sanitize_output($residents_url) ?>?view=<?= $view ?>&q=<?= urlencode($search) ?>&pp=<?= $per_page ?>&rs=Pending+Verification&drawer=<?= urlencode($drawer_search) ?>"
        style="padding:5px 14px;border-radius:6px;font-size:.78rem;font-weight:600;text-decoration:none;
               border:1.5px solid <?= $status_filter==='Pending Verification'?'#b7770d':'#fad7a0' ?>;
               background:<?= $status_filter==='Pending Verification'?'#b7770d':'transparent' ?>;
@@ -386,7 +387,7 @@ function renderFolder($folder_id, $label, $all_residents, $color, $is_special, $
   <!-- Per-page selector pushed to right -->
   <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
     <span style="font-size:.72rem;color:var(--text-muted);font-weight:600;">PER PAGE:</span>
-    <form method="GET" style="display:inline;">
+    <form method="GET" action="<?= sanitize_output($residents_url) ?>" style="display:inline;">
       <input type="hidden" name="view" value="<?= sanitize_output($view) ?>">
       <input type="hidden" name="q"    value="<?= sanitize_output($search) ?>">
       <input type="hidden" name="rs"   value="<?= sanitize_output($status_filter) ?>">
@@ -402,7 +403,7 @@ function renderFolder($folder_id, $label, $all_residents, $color, $is_special, $
   </div>
 </div>
   <!-- Per-page selector -->
-  <form method="GET" style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+  <form method="GET" action="<?= sanitize_output($residents_url) ?>" style="margin-left:auto;display:flex;align-items:center;gap:8px;">
     <input type="hidden" name="view" value="<?= sanitize_output($view) ?>">
     <input type="hidden" name="q"    value="<?= sanitize_output($search) ?>">
     <input type="hidden" name="drawer" value="<?= sanitize_output($drawer_search) ?>">
@@ -449,7 +450,7 @@ function renderFolder($folder_id, $label, $all_residents, $color, $is_special, $
            oninput="liveSearchResidents(this.value)"
            value="<?= sanitize_output($search) ?>">
   </div>
-  <form method="GET" class="d-flex gap-2 align-center">
+  <form method="GET" action="<?= sanitize_output($residents_url) ?>" class="d-flex gap-2 align-center">
     <input type="hidden" name="view" value="<?= sanitize_output($view) ?>">
     <input type="hidden" name="q" value="<?= sanitize_output($search) ?>">
     <input type="hidden" name="rs" value="<?= sanitize_output($status_filter) ?>">
@@ -460,7 +461,7 @@ function renderFolder($folder_id, $label, $all_residents, $color, $is_special, $
     <button class="btn btn-secondary btn-sm" type="submit" title="Filter by drawer location"><i class="fas fa-filter"></i></button>
   </form>
   <?php if ($search): ?>
-  <a href="?view=<?= $view ?>&pp=<?= $per_page ?>&drawer=<?= urlencode($drawer_search) ?>" class="btn btn-secondary btn-sm">
+  <a href="<?= sanitize_output($residents_url) ?>?view=<?= $view ?>&pp=<?= $per_page ?>&drawer=<?= urlencode($drawer_search) ?>" class="btn btn-secondary btn-sm">
     <i class="fas fa-xmark"></i> Clear
   </a>
   <?php endif; ?>
@@ -566,10 +567,6 @@ if ($view === 'purok') {
             <label>Email</label>
             <input type="email" name="email" class="form-control" maxlength="150">
           </div>
-          <div class="form-group" style="grid-column:1/-1;">
-            <label>Address</label>
-            <textarea name="address" class="form-control" rows="2" maxlength="500"></textarea>
-          </div>
           <div class="form-group">
             <label>Purok <span class="req">*</span></label>
             <select name="purok" class="form-control" required>
@@ -577,10 +574,6 @@ if ($view === 'purok') {
               <option>Purok 1</option><option>Purok 2</option>
               <option>Purok 3</option><option>Purok 4</option>
             </select>
-          </div>
-          <div class="form-group">
-            <label>Drawer Location</label>
-            <input type="text" name="drawer_location" class="form-control" maxlength="100" placeholder="e.g. Drawer 2">
           </div>
           <div class="form-group">
             <label>Years of Residency</label>

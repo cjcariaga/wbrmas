@@ -9,6 +9,7 @@ $conn = getDBConnection();
 require_once '../includes/drawer_index.php';
 ensure_default_drawers($conn);
 $csrf = generate_csrf_token();
+$drawers_url = app_url('drawers/index.php');
 $can_manage = can('manage_drawer_index');
 $drawer_id = max(0, (int)($_GET['drawer'] ?? 0));
 $search = trim(strip_tags((string)($_GET['q'] ?? '')));
@@ -33,7 +34,8 @@ if ($search !== '') {
     $like = '%' . $search . '%';
     $stmt = $conn->prepare(
         "SELECT e.entry_id, e.drawer_id, e.entry_label, e.entry_notes, e.resident_id, e.request_id,
-          d.drawer_name, r.resident_code, dr.request_code, dr.status AS request_status, dr.received_by
+          d.drawer_name, r.resident_code, dr.request_code, dr.status AS request_status,
+          dr.received_by, dr.preferred_pickup_date
          FROM tbl_storage_entries e
          JOIN tbl_storage_drawers d ON d.drawer_id=e.drawer_id
          LEFT JOIN tbl_residents r ON r.resident_id=e.resident_id
@@ -56,7 +58,8 @@ if ($search !== '') {
     if ($selected_drawer) {
         $stmt = $conn->prepare(
                 "SELECT e.entry_id, e.entry_label, e.entry_notes, e.resident_id, e.request_id,
-                  r.resident_code, dr.request_code, dr.status AS request_status, dr.received_by
+                  r.resident_code, dr.request_code, dr.status AS request_status,
+                  dr.received_by, dr.preferred_pickup_date
              FROM tbl_storage_entries e
              LEFT JOIN tbl_residents r ON r.resident_id=e.resident_id
              LEFT JOIN tbl_document_requests dr ON dr.request_id=e.request_id
@@ -94,7 +97,7 @@ require_once '../includes/header.php';
   <?php endif; ?>
 </div>
 
-<form method="GET" class="d-flex gap-2 align-center mb-3 flex-wrap">
+<form method="GET" action="<?= sanitize_output($drawers_url) ?>" class="d-flex gap-2 align-center mb-3 flex-wrap">
   <?php if ($selected_drawer && $search === ''): ?>
   <input type="hidden" name="drawer" value="<?= (int)$drawer_id ?>">
   <?php endif; ?>
@@ -106,7 +109,7 @@ require_once '../includes/header.php';
   </div>
   <button type="submit" class="btn btn-secondary"><i class="fas fa-search"></i> Search</button>
   <?php if ($search !== ''): ?>
-  <a href="<?= $selected_drawer ? '?drawer='.(int)$drawer_id : 'index.php' ?>" class="btn btn-secondary">Clear</a>
+  <a href="<?= sanitize_output($selected_drawer ? $drawers_url.'?drawer='.(int)$drawer_id : $drawers_url) ?>" class="btn btn-secondary">Clear</a>
   <?php endif; ?>
 </form>
 
@@ -116,7 +119,7 @@ require_once '../includes/header.php';
   <div class="card-body" style="padding:0;">
     <div class="table-wrapper">
       <table>
-        <thead><tr><th>Entry</th><th>Pickup Status</th><th>Received By</th><th>Notes</th><th>Drawer</th><th>Linked Record</th><th></th></tr></thead>
+        <thead><tr><th>Entry</th><th>Pickup Status</th><th>Received By</th><th>Notes</th><th>Drawer</th><th>Linked Record</th><th>Actions</th></tr></thead>
         <tbody>
         <?php if ($search_results): foreach ($search_results as $entry): ?>
           <?php [$entry_status_label, $entry_status_class] = drawerEntryStatus($entry['request_status'] ?? ''); ?>
@@ -125,9 +128,20 @@ require_once '../includes/header.php';
             <td><span class="badge badge-<?= $entry_status_class ?>"><?= sanitize_output($entry_status_label) ?></span></td>
             <td><?= sanitize_output($entry['received_by'] ?: '—') ?></td>
             <td><?= nl2br(sanitize_output($entry['entry_notes'] ?: '—')) ?></td>
-            <td><a href="?drawer=<?= (int)$entry['drawer_id'] ?>"><?= sanitize_output($entry['drawer_name']) ?></a></td>
+            <td><a href="<?= sanitize_output($drawers_url) ?>?drawer=<?= (int)$entry['drawer_id'] ?>"><?= sanitize_output($entry['drawer_name']) ?></a></td>
             <td><?= sanitize_output($entry['resident_code'] ?: $entry['request_code'] ?: '—') ?></td>
-            <td><?php if ($can_manage && !in_array($entry['request_status'] ?? '', ['STORED','RELEASED'], true)): ?><button type="button" class="btn btn-icon btn-sm" title="Edit entry" onclick='editEntry(<?= json_encode(['entry_id'=>(int)$entry['entry_id'],'drawer_id'=>(int)$entry['drawer_id'],'entry_label'=>$entry['entry_label'],'entry_notes'=>$entry['entry_notes'],'resident_id'=>$entry['resident_id'],'request_id'=>$entry['request_id']], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)'><i class="fas fa-pen"></i></button><?php elseif (in_array($entry['request_status'] ?? '', ['STORED','RELEASED'], true)): ?><span class="text-muted">Linked document</span><?php endif; ?></td>
+            <td>
+              <?php if (($entry['request_status'] ?? '') === 'STORED' && !empty($entry['request_id']) && can('approve_document')): ?>
+                <button type="button" class="btn btn-icon btn-sm" title="Mark as Picked Up" style="color:var(--success);" onclick="openDrawerReleaseModal(<?= (int)$entry['request_id'] ?>, <?= htmlspecialchars(json_encode($entry['request_code']), ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars(json_encode($entry['preferred_pickup_date'] ?? ''), ENT_QUOTES, 'UTF-8') ?>)"><i class="fas fa-person-walking-arrow-right"></i></button>
+              <?php elseif (($entry['request_status'] ?? '') === 'STORED'): ?>
+                <span class="text-muted">Awaiting Pickup</span>
+              <?php elseif (($entry['request_status'] ?? '') === 'RELEASED'): ?>
+                <span class="text-muted">Claimed</span>
+              <?php elseif ($can_manage): ?>
+                <button type="button" class="btn btn-icon btn-sm" title="Edit entry" onclick='editEntry(<?= json_encode(['entry_id'=>(int)$entry['entry_id'],'drawer_id'=>(int)$drawer_id,'entry_label'=>$entry['entry_label'],'entry_notes'=>$entry['entry_notes'],'resident_id'=>$entry['resident_id'],'request_id'=>$entry['request_id']], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)'><i class="fas fa-pen"></i></button>
+                <button type="button" class="btn btn-icon btn-sm" title="Remove entry" onclick="deleteEntry(<?= (int)$entry['entry_id'] ?>)"><i class="fas fa-trash"></i></button>
+              <?php endif; ?>
+            </td>
           </tr>
         <?php endforeach; else: ?>
           <tr><td colspan="7"><div class="empty-state"><i class="fas fa-folder-open"></i><p>No matching filing entries.</p></div></td></tr>
@@ -152,7 +166,7 @@ require_once '../includes/header.php';
           <tbody>
           <?php foreach ($drawers as $drawer): ?>
             <tr>
-              <td><a href="?drawer=<?= (int)$drawer['drawer_id'] ?>"><i class="fas fa-folder" style="margin-right:8px;color:#c18a24;"></i><strong><?= sanitize_output($drawer['drawer_name']) ?></strong></a></td>
+              <td><a href="<?= sanitize_output($drawers_url) ?>?drawer=<?= (int)$drawer['drawer_id'] ?>"><i class="fas fa-folder" style="margin-right:8px;color:#c18a24;"></i><strong><?= sanitize_output($drawer['drawer_name']) ?></strong></a></td>
               <td><?= number_format((int)$drawer['entry_count']) ?></td>
               <td><span class="badge badge-warning"><?= number_format((int)$drawer['awaiting_count']) ?></span></td>
               <td><span class="badge badge-success"><?= number_format((int)$drawer['claimed_count']) ?></span></td>
@@ -186,7 +200,20 @@ require_once '../includes/header.php';
             <td><?= sanitize_output($entry['received_by'] ?: '—') ?></td>
             <td><?= nl2br(sanitize_output($entry['entry_notes'] ?: '—')) ?></td>
             <td><?= sanitize_output($entry['resident_code'] ?: $entry['request_code'] ?: '—') ?></td>
-            <td><?php if ($can_manage && !in_array($entry['request_status'] ?? '', ['STORED','RELEASED'], true)): ?><div class="d-flex gap-2"><button type="button" class="btn btn-icon btn-sm" title="Edit entry" onclick='editEntry(<?= json_encode(['entry_id'=>(int)$entry['entry_id'],'drawer_id'=>(int)$drawer_id,'entry_label'=>$entry['entry_label'],'entry_notes'=>$entry['entry_notes'],'resident_id'=>$entry['resident_id'],'request_id'=>$entry['request_id']], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)'><i class="fas fa-pen"></i></button><button type="button" class="btn btn-icon btn-sm" title="Remove entry" onclick="deleteEntry(<?= (int)$entry['entry_id'] ?>)"><i class="fas fa-trash"></i></button></div><?php elseif (in_array($entry['request_status'] ?? '', ['STORED','RELEASED'], true)): ?><span class="text-muted">Linked document</span><?php endif; ?></td>
+            <td>
+              <?php if (($entry['request_status'] ?? '') === 'STORED' && !empty($entry['request_id']) && can('approve_document')): ?>
+                <button type="button" class="btn btn-icon btn-sm" title="Mark as Picked Up" style="color:var(--success);" onclick="openDrawerReleaseModal(<?= (int)$entry['request_id'] ?>, <?= htmlspecialchars(json_encode($entry['request_code']), ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars(json_encode($entry['preferred_pickup_date'] ?? ''), ENT_QUOTES, 'UTF-8') ?>)"><i class="fas fa-person-walking-arrow-right"></i></button>
+              <?php elseif (($entry['request_status'] ?? '') === 'STORED'): ?>
+                <span class="text-muted">Awaiting Pickup</span>
+              <?php elseif (($entry['request_status'] ?? '') === 'RELEASED'): ?>
+                <span class="text-muted">Claimed</span>
+              <?php elseif ($can_manage): ?>
+                <div class="d-flex gap-2">
+                  <button type="button" class="btn btn-icon btn-sm" title="Edit entry" onclick='editEntry(<?= json_encode(['entry_id'=>(int)$entry['entry_id'],'drawer_id'=>(int)$drawer_id,'entry_label'=>$entry['entry_label'],'entry_notes'=>$entry['entry_notes'],'resident_id'=>$entry['resident_id'],'request_id'=>$entry['request_id']], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)'><i class="fas fa-pen"></i></button>
+                  <button type="button" class="btn btn-icon btn-sm" title="Remove entry" onclick="deleteEntry(<?= (int)$entry['entry_id'] ?>)"><i class="fas fa-trash"></i></button>
+                </div>
+              <?php endif; ?>
+            </td>
           </tr>
         <?php endforeach; else: ?>
           <tr><td colspan="6"><div class="empty-state"><i class="fas fa-folder-open"></i><p>No index entries in this drawer yet.</p></div></td></tr>
@@ -300,6 +327,94 @@ async function deleteEntry(entryId) {
   if (!result.success) { showToast('error', result.message || 'Could not remove entry.'); return; }
   showToast('success', 'Entry removed.');
   window.location.reload();
+}
+</script>
+<?php endif; ?>
+<?php if (can('approve_document')): ?>
+<div class="modal-overlay" id="drawerReleaseModal">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-header">
+      <h4><i class="fas fa-person-circle-check"></i> Confirm Document Pickup</h4>
+      <button type="button" class="modal-close" onclick="closeModal('drawerReleaseModal')"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="drawerReleaseRequestId">
+      <p id="drawerReleaseRequestCode" style="margin:0 0 16px;color:var(--text-muted);"></p>
+      <div id="drawerEarlyPickupNotice" hidden style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:12px;margin-bottom:16px;">
+        <p style="margin:0 0 8px;">The scheduled pickup date is <strong id="drawerEarlyPickupScheduleDate"></strong>. Confirm only if an emergency requires an early pickup.</p>
+        <label style="display:flex;align-items:flex-start;gap:8px;">
+          <input type="checkbox" id="drawerEarlyPickupAcknowledged" style="margin-top:3px;">
+          <span>I confirm this early pickup is approved.</span>
+        </label>
+      </div>
+      <div class="form-group">
+        <label for="drawerReleaseReceivedBy">Received By <span class="req">*</span></label>
+        <input type="text" id="drawerReleaseReceivedBy" class="form-control" maxlength="150" required placeholder="Resident or authorized representative">
+      </div>
+      <div class="form-group">
+        <label for="drawerReleaseDateTime">Date and Time Released <span class="req">*</span></label>
+        <input type="datetime-local" id="drawerReleaseDateTime" class="form-control" required>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" onclick="closeModal('drawerReleaseModal')">Cancel</button>
+      <button type="button" class="btn btn-primary" id="drawerConfirmReleaseButton" onclick="confirmDrawerDocumentRelease()"><i class="fas fa-check"></i> Confirm Release</button>
+    </div>
+  </div>
+</div>
+<script>
+const DRAWER_DOCUMENT_API = <?= json_encode(app_url('documents/api.php')) ?>;
+const DRAWER_SERVER_DATE = <?= json_encode(date('Y-m-d')) ?>;
+let drawerReleaseNeedsEarlyAcknowledgement = false;
+
+function openDrawerReleaseModal(requestId, requestCode, preferredPickupDate = '') {
+  document.getElementById('drawerReleaseRequestId').value = requestId;
+  document.getElementById('drawerReleaseRequestCode').textContent = `Request ${requestCode} is stored and awaiting pickup.`;
+  document.getElementById('drawerReleaseReceivedBy').value = '';
+  drawerReleaseNeedsEarlyAcknowledgement = preferredPickupDate !== '' && preferredPickupDate > DRAWER_SERVER_DATE;
+  document.getElementById('drawerEarlyPickupNotice').hidden = !drawerReleaseNeedsEarlyAcknowledgement;
+  document.getElementById('drawerEarlyPickupScheduleDate').textContent = preferredPickupDate;
+  document.getElementById('drawerEarlyPickupAcknowledged').checked = false;
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  document.getElementById('drawerReleaseDateTime').value = now.toISOString().slice(0, 16);
+  openModal('drawerReleaseModal');
+}
+
+async function confirmDrawerDocumentRelease() {
+  const requestId = document.getElementById('drawerReleaseRequestId').value;
+  const receivedBy = document.getElementById('drawerReleaseReceivedBy').value.trim();
+  const releasedAt = document.getElementById('drawerReleaseDateTime').value;
+  const button = document.getElementById('drawerConfirmReleaseButton');
+  if (!receivedBy || !releasedAt) {
+    showToast('error', 'Enter the receiving person and release date/time.');
+    return;
+  }
+  if (drawerReleaseNeedsEarlyAcknowledgement && !document.getElementById('drawerEarlyPickupAcknowledged').checked) {
+    showToast('error', 'Confirm the emergency early pickup before continuing.');
+    return;
+  }
+  button.disabled = true;
+  try {
+    const result = await apiRequest(`${DRAWER_DOCUMENT_API}?action=release_document`, {
+      request_id: requestId,
+      received_by: receivedBy,
+      released_at: releasedAt,
+      early_pickup_acknowledged: drawerReleaseNeedsEarlyAcknowledgement ? 1 : 0,
+      csrf_token: <?= json_encode($csrf) ?>
+    });
+    if (!result.success) {
+      showToast('error', result.message || 'Could not confirm document release.');
+      return;
+    }
+    closeModal('drawerReleaseModal');
+    showToast('success', 'Document marked as released.');
+    setTimeout(() => window.location.reload(), 700);
+  } catch (error) {
+    showToast('error', 'Could not confirm document release. Please try again.');
+  } finally {
+    button.disabled = false;
+  }
 }
 </script>
 <?php endif; ?>

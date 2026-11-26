@@ -93,7 +93,7 @@
     </a>
     <?php endif; ?>
 
-    <?php if (is_admin() || can('manage_users') || can('view_audit') || can('view_analytics')): ?>
+    <?php if (is_admin() || can('manage_users') || can('view_audit') || can('view_analytics') || can('view_visitor_logbook')): ?>
     <div class="nav-section-label">Administration</div>
     <?php if (is_admin() || can('manage_users')): ?>
     <a href="admin/users.php" class="nav-item <?= $active_page === 'users' ? 'active' : '' ?>">
@@ -116,6 +116,11 @@
     </a>
     <a href="admin/backup.php" class="nav-item <?= $active_page === 'backup' ? 'active' : '' ?>">
       <i class="fas fa-database"></i><span>DB Backup</span>
+    </a>
+    <?php endif; ?>
+    <?php if (can('view_visitor_logbook')): ?>
+    <a href="admin/visitor_logbook.php" class="nav-item <?= $active_page === 'visitor_logbook' ? 'active' : '' ?>">
+      <i class="fas fa-clipboard-list"></i><span>Visitor Logbook</span>
     </a>
     <?php endif; ?>
     <?php endif; ?>

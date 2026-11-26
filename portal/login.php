@@ -42,13 +42,16 @@ html,body{margin:0 !important;padding:0 !important}body{background:#f3f4ef;color
 @media(max-width:760px){.hero-shade{background:linear-gradient(90deg,rgba(16,47,82,1) 30%,rgba(16,47,82,.86) 58%,rgba(16,47,82,.38) 100%)}}
 @media(max-width:760px){.footer-developers{display:grid;gap:4px}}
 </style>
+<style>
+@media(max-width:760px){.site-nav-links>a.visitor-nav-link{display:inline-flex;margin-right:10px;white-space:nowrap;font-size:.72rem}}
+</style>
 </head>
 <body>
 <div class="resident-site">
   <header class="site-nav">
     <a class="portal-brand" href="#home"><img src="<?= htmlspecialchars(app_url('assets/img/brgy_seal.png'), ENT_QUOTES, 'UTF-8') ?>" alt=""><span><strong>Barangay San Isidro</strong><small>Resident Services Portal</small></span></a>
     <nav class="site-nav-links" aria-label="Main navigation">
-      <a href="#home">Home</a><a href="#about">About</a><a href="#services">Services</a><a href="#contact">Contact</a>
+      <a href="#home">Home</a><a class="visitor-nav-link" href="<?= htmlspecialchars(app_url('index.php'), ENT_QUOTES, 'UTF-8') ?>#visitor-logbook">Visitor Logbook</a><a href="#about">About</a><a href="#services">Services</a><a href="#contact">Contact</a>
       <a class="nav-login" href="#login"><i class="fas fa-right-to-bracket" aria-hidden="true"></i> Log in</a>
     </nav>
   </header>
